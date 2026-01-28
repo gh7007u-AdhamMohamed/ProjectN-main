@@ -1,3 +1,6 @@
+import File from "../models/files.model.js";
+
+
 const addFile = (req,res)=>{
     console.log(req.body);
     res.json({
@@ -15,12 +18,9 @@ const couseId = +req.params.id;
 console.log(couseId); 
 };
 
-const getAllFiles = (req,res)=>{
-res.json(
-    {
-        "id":1
-    }
-);
+const getAllFiles = async(req,res)=>{
+const files= await File.find();
+res.json(files);
 };
 
 const getSingleFile =  (req,res)=>{
@@ -30,7 +30,7 @@ res.json({
     "id": couseId
 });
 };
-module.exports = {
+export default {
     addFile,
     updateFile,
     deleteFile,

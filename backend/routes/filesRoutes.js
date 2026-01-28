@@ -13,4 +13,5 @@ router.post('/', files.addFile )
 router.patch('/:id',files.updateFile );
 //delete a file by id
 router.delete('/:id', files.deleteFile)
- 
+
+ export default router;
