@@ -1,6 +1,6 @@
 import File from "../models/files.model.js";
 import mongoose from "mongoose";
-import { validate } from "../validator.js";
+
 const addFile = async (req,res)=>{
     try {
     const fileData = req.body;
@@ -28,15 +28,25 @@ const addFile = async (req,res)=>{
   };
 
 }
-const updateFile = (req,res)=>{
-const couseId = +req.params.id;
-console.log(couseId);
+const updateFile = async (req,res)=>{
+const courseId = req.params.id;
+const updatedFile = await File.findByIdAndUpdate(courseId,{$set: req.body}, { new: true });
+res.json(updatedFile);
+}; 
 
-};
+const deleteFile = async(req,res)=>{
+    try {
+        const fileId = req.params.id;
+        const deletedFile = await File.findByIdAndDelete(mongoose.Types.ObjectId(fileId));
 
-const deleteFile = (req,res)=>{
-const couseId = +req.params.id;
-console.log(couseId); 
+        if (!deletedFile) {
+            return res.status(404).json({ message: "File not found" });
+        }
+
+        res.status(200).json({ message: "File deleted successfully", deletedFile });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 };
 
 const getAllFiles = async(req,res)=>{
@@ -47,13 +57,13 @@ res.json(files);
 const getSingleFile = async(req,res)=>{
  try {
     const fileId = req.params.id;
-    const file= await File.findById(mongoose.Types.ObjectId(fileId));
+    const file= await File.findById(fileId);
     if(!file){
         return res.status(404).json({message:"File not found"});
     }
     res.json(file);
  }catch (error) {
-    res.status(500).json({message:error.message});
+    res.status(500).json({ message: "invalid file id"});
 }}
 export default {
     addFile,
