@@ -29,15 +29,19 @@ const addFile = async (req,res)=>{
 
 }
 const updateFile = async (req,res)=>{
+  try{
 const courseId = req.params.id;
-const updatedFile = await File.findByIdAndUpdate(courseId,{$set: req.body}, { new: true });
-res.json(updatedFile);
+const updatedFile = await File.updateOne({_id: courseId},{$set: req.body});
+res.status(200).json(updatedFile);
+}catch (error) {
+    res.status(500).json({ message: error.message }); 
 }; 
+}
 
 const deleteFile = async(req,res)=>{
     try {
-        const fileId = req.params.id;
-        const deletedFile = await File.findByIdAndDelete(mongoose.Types.ObjectId(fileId));
+       const fileId=req.params.id;
+       const deletedFile= await File.deleteOne({_id:fileId})
 
         if (!deletedFile) {
             return res.status(404).json({ message: "File not found" });
