@@ -3,6 +3,7 @@ import express from "express";
 import filesRoutes from "./routes/filesRoutes.js";
 import mongoose from "mongoose";
 import File from "./models/files.model.js";
+import cors from "cors";
 const url = 'mongodb+srv://gh7007u_db_user:FileManger54@learnmongodb.xxuuapt.mongodb.net/FileManger';
 
  await mongoose.connect(url).then(()=>{
@@ -21,6 +22,7 @@ changeStream.on("change", (change) => {
 const app = express();
 //middleware to parse json body
 app.use(express.json()); 
+app.use(cors({origin:"http://localhost:5173"}));
 app.use('/api/file',filesRoutes);
 
 
