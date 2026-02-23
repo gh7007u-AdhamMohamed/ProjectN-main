@@ -5,8 +5,9 @@ const router = express.Router();
 router.get('/',files.getAllFiles);
 
 //get single file by id
-router.get('/:id',files.getSingleFile);
+router.get('/folders',files.getAllFolders);
 
+router.get('/:id',files.getSingleFile);
 //create a new file,body('title').notempty().withMessage('Title is required'),const errors = validationResult(req);if(!errors.isEmpty()){return res.status(400).json({errors:errors.array()});}
 router.post('/', levelValidator,validate, files.addFile )
 

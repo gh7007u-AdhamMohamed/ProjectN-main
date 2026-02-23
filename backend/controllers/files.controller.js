@@ -57,6 +57,20 @@ const getAllFiles = async(req,res)=>{
 const files= await File.find();
 res.json(files);
 };
+const getAllFolders = async (req, res) => {
+  try {
+    const folders = await File.find({
+      level: 1,
+      type: "folder",
+      
+    });
+
+    res.json(folders);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
 
 const getSingleFile = async(req,res)=>{
  try {
@@ -74,5 +88,6 @@ export default {
     updateFile,
     deleteFile,
     getAllFiles,
-    getSingleFile
+    getSingleFile,
+    getAllFolders
 };
