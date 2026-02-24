@@ -26,6 +26,7 @@ const HomePage = () => {
   }
   fetchFolders()
   }, [])
+  
  return (
     <div className='min-h-screen'>
        <Navbar />
