@@ -4,6 +4,11 @@ import filesRoutes from "./routes/filesRoutes.js";
 import mongoose from "mongoose";
 import File from "./models/files.model.js";
 import cors from "cors";
+import usersRoutes from "./routes/usersRoutes.js";
+import receiptRoutes from "./routes/receiptsRoutes.js";
+
+import dotenv from "dotenv";
+dotenv.config();
 const url = 'mongodb+srv://gh7007u_db_user:FileManger54@learnmongodb.xxuuapt.mongodb.net/FileManger';
 
  await mongoose.connect(url).then(()=>{
@@ -24,6 +29,8 @@ const app = express();
 app.use(express.json()); 
 app.use(cors({origin:"http://localhost:5173"}));
 app.use('/api/file',filesRoutes);
+app.use('/api/users',usersRoutes);
+app.use('/api/receipt',receiptRoutes);
 
 
 //server listening on port 5000

@@ -1,9 +1,10 @@
 import files from "../controllers/files.controller.js";
 import express from "express";
 import { levelValidator, validate } from "../validator.js";
+import tokenver from "./tokenver.js";
+import allowed from "../Scripts/allowed.js";
 const router = express.Router();
-router.get('/',files.getAllFiles);
-
+router.get('/', tokenver,allowed("admin"), files.getAllFiles);
 //get single file by id
 router.get('/folders',files.getAllFolders);
 
