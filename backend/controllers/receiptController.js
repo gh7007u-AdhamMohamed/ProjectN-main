@@ -1,33 +1,49 @@
 import File from "../models/files.model.js";
 import mongoose from "mongoose";
+import { Receipt, Wallet, Counter } from "../models/receipt.model.js";
 
-const addFile = async (req,res)=>{
+
+const addReceipt = async (req,res)=>{
+
     try {
-    const fileData = req.body;
-    const { name, type, path, level, parent_id } = req.body;
+    const counter = await Counter.findOneAndUpdate(
+    { id: "receiptId" }, 
+    { $inc: { seq: 1 } }, 
+    { new: true }
+    );
 
-    const file = new File({
-      name,
-      type ,
-      path,
-      level,
-      parent_id
+    const nextNumber = counter.seq;
+    const {  name, description, amount, category, date } = req.body;
+    const receipt = new Receipt({
+        receiptNumber: nextNumber,
+        name,
+        description,
+        amount,
+        category,
+        date
     });
-    
-    await file.save(); 
-    
-    res.status(201).json({
-      message: "File created successfully",
-      file
-    });
-  } catch (error) {
-    res.status(400).json({
-      message: "Error creating file",
-      error: error.message
-    });
-  };
+    await receipt.save();
+    await Wallet.findOneAndUpdate(
+      {}, 
+      { $inc: { totalBalance: -receipt.amount } }, 
+      { session, upsert: true }
+    );
+        res.status(201).json({receipt,nextNumber});
 
-}
+}catch (error) {
+    res.status(500).json({ message: error.message });
+}}
+
+const getAllReceipts = async(req,res)=>{
+    try{
+        const receipts = await Receipt.find();
+        res.json(receipts);
+    }catch (error) {
+        res.status(500).json({ message: error.message });
+    }   }
+
+
+
 const updateFile = async (req,res)=>{
   try{
 const courseId = req.params.id;
@@ -84,10 +100,5 @@ const getSingleFile = async(req,res)=>{
     res.status(500).json({ message: "invalid file id"});
 }}
 export default {
-    addFile,
-    updateFile,
-    deleteFile,
-    getAllFiles,
-    getSingleFile,
-    getAllFolders
+    addReceipt
 };

@@ -20,13 +20,20 @@ const receiptSchema = new mongoose.Schema({
 const walletSchema = new mongoose.Schema({
   totalBalance: { type: Number, default: 0 }
 });
+const counterSchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  seq: { type: Number, default: 0 }
+});
+
+const Counter = mongoose.model("Counter", counterSchema);
 
 receiptSchema.index(
   { description: "text", name: "text" }, 
   { default_language: "arabic" } 
 );
+
 const Category = mongoose.model("Category", categorySchema);
 const Receipt = mongoose.model("Receipt", receiptSchema);
 const Wallet = mongoose.model("Wallet", walletSchema);
 
-export { Category, Receipt, Wallet };
+export { Category, Receipt, Wallet, Counter };

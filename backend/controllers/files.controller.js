@@ -1,6 +1,6 @@
 import File from "../models/files.model.js";
 import mongoose from "mongoose";
-
+import { Receipt, Wallet, Category } from "./yourSchemaFile.js";
 const addFile = async (req,res)=>{
     try {
     const fileData = req.body;
