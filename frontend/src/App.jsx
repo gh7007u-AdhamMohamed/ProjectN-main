@@ -2,6 +2,7 @@ import React from 'react'
 import { Route, Routes } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import CreateFile from './pages/CreateFile'
+import { LoginPage } from './pages/LoginPage'
 //import { toast } from 'react-hot-toast'
 const App = () => {
   return (
@@ -9,7 +10,8 @@ const App = () => {
 
     <div data-theme="forest" >
   <Routes>
-    <Route path='/' element={<HomePage />} />
+    <Route path='/' element={<LoginPage />} />
+    <Route path='/home' element={<HomePage />} />
     <Route path='/create-file' element={<CreateFile />} />
 
   </Routes>

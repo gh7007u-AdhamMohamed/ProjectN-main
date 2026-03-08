@@ -3,108 +3,192 @@ import mongoose from "mongoose";
 import { Receipt, Wallet, Counter } from "../models/receipt.model.js";
 
 
-const addReceipt = async (req,res)=>{
-
-    try {
+const addReceipt = async (req, res) => {
+  try {
     const counter = await Counter.findOneAndUpdate(
-    { id: "receiptId" }, 
-    { $inc: { seq: 1 } }, 
-    { new: true }
+      { id: "receiptId" },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
     );
 
     const nextNumber = counter.seq;
-    const {  name, description, amount, category, date } = req.body;
-    const receipt = new Receipt({
-        receiptNumber: nextNumber,
-        name,
-        description,
-        amount,
-        category,
-        date
-    });
-    await receipt.save();
-    await Wallet.findOneAndUpdate(
-      {}, 
-      { $inc: { totalBalance: -receipt.amount } }, 
-      { session, upsert: true }
-    );
-        res.status(201).json({receipt,nextNumber});
+    const { name, description, amount, category, date } = req.body;
 
-}catch (error) {
+    const receipt = new Receipt({
+      receiptNumber: nextNumber,
+      name,
+      description,
+      amount,
+      category,
+      date
+    });
+
+    await receipt.save();
+
+    await Wallet.findOneAndUpdate(
+      {},
+      { $inc: { totalBalance: -amount } },
+      { upsert: true }
+    );
+
+    res.status(201).json({ receipt, nextNumber });
+
+  } catch (error) {
     res.status(500).json({ message: error.message });
-}}
+  }
+};
 
 const getAllReceipts = async(req,res)=>{
     try{
         const receipts = await Receipt.find();
         res.json(receipts);
     }catch (error) {
-        res.status(500).json({ message: error.message });
-    }   }
+        res.status(500).json({ message: error.message });}  
+};
 
+const sortReceipts = async (req, res) => {
+  try {
+    const { date, category } = req.query;
 
+    let dateFilter = {};
+    let categoryFilter = {};
 
-const updateFile = async (req,res)=>{
-  try{
-const courseId = req.params.id;
-const updatedFile = await File.updateOne({_id: courseId},{$set: req.body});
-res.status(200).json(updatedFile);
-}catch (error) {
-    res.status(500).json({ message: error.message }); 
-}; 
-}
+    if (date === "asc") {
+      dateFilter = { date: 1 };
+    } else if (date === "desc") {
+      dateFilter = { date: -1 };
+    }
 
-const deleteFile = async(req,res)=>{
+    if (category) {
+      categoryFilter = { category: category };
+    }
+
+    const receipts = await Receipt.find(categoryFilter).sort(dateFilter);
+
+    res.json(receipts);
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const updateReceipt = async (req,res) => {
+  try {
+    const receiptid = req.params.id;
+    const findReceipt = await Receipt.findById(receiptid);
+    if (!findReceipt) return res.status(404).json({ message: "Receipt not found" });
+
+    // Keep old amount if not provided
+    const newAmount = req.body.amount !== undefined ? req.body.amount : findReceipt.amount;
+
+    const updatedReceipt = await Receipt.findByIdAndUpdate(
+      receiptid,
+      { ...req.body, amount: newAmount },
+      { new: true }
+    );
+
+    const updateWallet = await Wallet.findOneAndUpdate(
+      {},
+      { $inc: { totalBalance: findReceipt.amount - updatedReceipt.amount } },
+      { new: true, upsert: true }
+    );
+
+    res.status(200).json({ updatedReceipt, updateWallet });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const deleteReceipt = async(req,res)=>{
     try {
-       const fileId=req.params.id;
-       const deletedFile= await File.deleteOne({_id:fileId})
+       const receiptId=req.params.id;
+       const deletedReceipt = await Receipt.findByIdAndDelete(receiptId);
 
-        if (!deletedFile) {
-            return res.status(404).json({ message: "File not found" });
+        if (!deletedReceipt) {
+            return res.status(404).json({ message: "Receipt not found" });
         }
 
-        res.status(200).json({ message: "File deleted successfully", deletedFile });
+        const updatewallet = await Wallet.findOneAndUpdate(
+            {},
+            { $inc: { totalBalance: +deletedReceipt.amount } },
+            { upsert: true }
+          );
+            res.status(200).json({ message: "Receipt deleted successfully", deletedReceipt, updatewallet });
+
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
 
-const getAllFiles = async(req,res)=>{
-const files= await File.find();
-res.json(files);
-};
-const getAllFolders = async (req, res) => {
+const searchReceipts = async (req, res) => {
   try {
-    const folders = await File.find({
-      level: 1,
-      type: "folder",
-      
-    });
+    const { query } = req.query; 
+    let filter = {};
 
-    res.json(folders);
+    if (query) {
+      filter = {
+        $or: [
+          { name: { $regex: query, $options: "i" } },         // partial, case-insensitive
+          { description: { $regex: query, $options: "i" } },  // partial, case-insensitive
+          { receiptNumber: Number(query) || -1 },             // exact number
+            ]
+      };
+    }
+
+    const receipts = await Receipt.find(filter).sort({ date: -1 });
+    res.json(receipts);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server Error" });
+    res.status(500).json({ message: error.message });
   }
 };
 
-const getSingleFile = async(req,res)=>{
- try {
-    const fileId = req.params.id;
-    const file= await File.findById(fileId);
-    if(!file){
-        return res.status(404).json({message:"File not found"});
+const updateWallet = async(req,res)=>{
+  try {
+    const { amount } = req.body;
+    const wallet = await Wallet.findOneAndUpdate(
+      {},
+      { $inc: { totalBalance: amount } },
+        { new: true, upsert: true }
+    );
+    res.json(wallet);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getWallet = async(req,res)=>{
+  try {
+    const wallet = await Wallet.findOne({});
+    res.json(wallet);
+    } catch (error) {   
+    res.status(500).json({ message: error.message });
     }
-    res.json(file);
- }catch (error) {
-    res.status(500).json({ message: "invalid file id"});
-}}
+};
+
+const getReceiptReport = async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+    const receipts = await Receipt.find({
+      date: {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate)
+      }
+    }).sort({ date: -1 });
+    res.json(receipts);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export default {
     addReceipt,
     getAllReceipts,
-    updateFile,
-    deleteFile,
-    getAllFiles,
-    getAllFolders,
-    getSingleFile
+    updateReceipt,
+    deleteReceipt,
+    getReceiptReport,
+    sortReceipts,
+    searchReceipts,
+    updateWallet,
+    getWallet
 };
