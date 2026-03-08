@@ -100,5 +100,11 @@ const getSingleFile = async(req,res)=>{
     res.status(500).json({ message: "invalid file id"});
 }}
 export default {
-    addReceipt
+    addReceipt,
+    getAllReceipts,
+    updateFile,
+    deleteFile,
+    getAllFiles,
+    getAllFolders,
+    getSingleFile
 };
