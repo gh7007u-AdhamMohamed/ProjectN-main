@@ -6,7 +6,14 @@ import axios from 'axios'
 const ReceiptsPage = () => {
   const role = sessionStorage.getItem('role') 
 const [receipt, setReceipt] = useState([]);
-
+const [showModal, setShowModal] = useState(false)
+const [formData, setFormData] = useState({
+  name: '',
+  description: '',
+  amount: '',
+  category: '',
+  date: ''
+})
   useEffect(() => {
     // Define the async function inside useEffect
     const fetchNotes = async () => {
@@ -21,12 +28,80 @@ const [receipt, setReceipt] = useState([]);
 
     fetchNotes();
   }, []);
+const handleAddReceipt = async () => {
+  try {
 
+    await axios.post('http://localhost:5000/api/receipt/', formData)
+
+    setShowModal(false) 
+  
+    const res = await axios.get('http://localhost:5000/api/receipt/')
+    setReceipt(res.data)
+
+  } catch (err) {
+    console.log(err)
+    alert('Failed to add receipt')
+  }
+}
   
   return (
     <div className='min-h-screen'>
-      <NavbarR/>
+       <NavbarR onAddClick={() => setShowModal(true)} />
+   {showModal && (
+        <div className='fixed inset-0 bg-black/50 flex items-center justify-center z-50'>
+          <div className='bg-base-100 border border-base-300 rounded-2xl p-6 w-full max-w-md'>
 
+            <h2 className='text-2xl font-extrabold text-primary font-mono mb-4'>
+              New Payment Order
+            </h2>
+
+            <div className='flex flex-col gap-3'>
+        <input
+          type='text'
+          placeholder='Name'
+          className='input input-bordered w-full'
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+        />
+        <input
+          type='text'
+          placeholder='Description'
+          className='input input-bordered w-full'
+          value={formData.description}
+          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+        />
+        <input
+          type='number'
+          placeholder='Amount'
+          className='input input-bordered w-full'
+          value={formData.amount}
+          onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+        />
+        <input
+          type='text'
+          placeholder='Category'
+          className='input input-bordered w-full'
+          value={formData.category}
+          onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+        />
+        <input
+          type='date'
+          className='input input-bordered w-full'
+          value={formData.date}
+          onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+        />
+            </div>
+
+            <div className='flex gap-3 mt-5'>
+              <button onClick={handleAddReceipt} className='btn btn-primary flex-1'>
+              Add
+              </button>
+              <button onClick={() => setShowModal(false)} className='btn btn-ghost flex-1'>Cancel</button>
+            </div>
+
+          </div>
+        </div>
+      )}
       <div className='w-full px-6 mt-6'>
 
         {/* ===== CARDS GRID ===== */}
@@ -44,10 +119,7 @@ const [receipt, setReceipt] = useState([]);
                   #{receipt.receiptNumber}
                 </span>
                 <div className='flex items-center gap-2'>
-                  {/* Category badge */}
-                 <span className='badge badge-primary badge-outline text-xs'>
-                    {receipt.category}
-                </span>
+
 
                 {/* Approval status badge */}
                 <span
@@ -64,15 +136,19 @@ const [receipt, setReceipt] = useState([]);
                 </div>
               </div>
 
-              {/* MIDDLE: name + description */}
-              <div>
-                <h3 className='text-sm font-extrabold text-primary font-mono tracking-tight'>
-                  {receipt.name}
+            {/* MIDDLE: name + description */}
+            <div className="flex items-center justify-between gap-3">
+            {/* Left: name + description stacked */}
+            <div className="flex flex-col break-words overflow-hidden">
+                <h3 className="text-sm font-extrabold text-primary font-mono tracking-tight">
+                {receipt.name}
                 </h3>
-                <p className='text-sm text-base-content/60 mt-1 overflow-hidden break-words '>
-                  {receipt.description}
+                <p className="text-sm text-base-content/60 break-words ">
+                {receipt.description}
                 </p>
-              </div>
+            </div>
+
+            </div>
 
               {/* BOTTOM ROW: amount + date + buttons */}
               <div className='flex items-center justify-between mt-2'>
@@ -80,7 +156,7 @@ const [receipt, setReceipt] = useState([]);
                 <div>
                   {/* Amount */}
                   <p className='text-1xl font-bold text-primary'>
-                    ${receipt.amount.toLocaleString()}
+                     {receipt.amount.toLocaleString()}  EGP
                   </p>
                   {/* Date */}
                   <p className='text-xs text-base-content/50 mt-1'>
