@@ -10,6 +10,7 @@ const fileSchema = new mongoose.Schema({    name: {
       enum: ["folder", "file"],
       required: true,
     },
+
     parent_id: {
       type: mongoose.Schema.Types.ObjectId,
       default: null,

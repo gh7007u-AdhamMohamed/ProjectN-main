@@ -181,6 +181,26 @@ const getReceiptReport = async (req, res) => {
   }
 };
 
+const changeApprovalStatus = async (req, res) => {
+    try{
+        const receiptId = req.params.id;
+        const receipe=await Receipt.findById(receiptId);
+        if(!receipe){
+            return res.status(404).json({message:"Receipt not found"});
+        }
+        const { approvalStatus } = req.body;
+        const updatedReceipt = await Receipt.findByIdAndUpdate(
+            receiptId,
+            { approvalStatus },
+            { new: true }
+        );
+        res.json(updatedReceipt);
+    }catch (error) {
+        res.status(500).json({ message: error.message });   
+    }
+
+;}
+
 export default {
     addReceipt,
     getAllReceipts,
@@ -190,5 +210,6 @@ export default {
     sortReceipts,
     searchReceipts,
     updateWallet,
-    getWallet
+    getWallet,
+    changeApprovalStatus
 };

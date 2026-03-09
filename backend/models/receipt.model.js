@@ -13,6 +13,7 @@ const receiptSchema = new mongoose.Schema({
     type: String, 
     required: true 
   },
+  approvalStatus: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
   date: { type: Date, required: true ,index: true},
 }, { timestamps: true });
 

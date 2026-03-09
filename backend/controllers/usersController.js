@@ -39,7 +39,6 @@ console.log(token);
     }
 }
 
-
 const login= async(req,res,next)=>{
     const {email,password}=req.body;
     if(!email || !password){
@@ -56,12 +55,13 @@ const login= async(req,res,next)=>{
         const token= await jwt.sign({email:user.email,id:user._id,role:user.role},process.env.JWT_SECRET,{expiresIn:"1h"});
 
         res.status(200).json({status:"success",data:user,token});
+
        }else{
         res.status(400).json({status:"error",message:"Invalid email or password"});
        }
     } catch (error) {
         res.status(500).json({status:"error",message:error.message});
-    }}
+}}
 
 export default {
     getAllUsers,

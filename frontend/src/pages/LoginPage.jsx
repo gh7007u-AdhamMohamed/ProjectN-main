@@ -15,8 +15,8 @@ export const LoginPage = () => {
     try {
       const res = await axios.post('http://localhost:5000/api/users/login', formData)
 
-      localStorage.setItem('token', res.data.token)
-      localStorage.setItem('role', res.data.role)
+      sessionStorage.setItem('token', res.data.token)
+      sessionStorage.setItem('role', res.data.data.role)
 
       navigate('/receipts')
 
@@ -36,7 +36,7 @@ export const LoginPage = () => {
         <label className='text-2xl font-extrabold text-primary font-mono tracking-tight text-center'>Email</label>
         <input
           type="email"
-          name="username"
+          name="email"
           placeholder="Enter email"
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -44,6 +44,7 @@ export const LoginPage = () => {
           required
         />
       </div>
+      
 
       {/* Password */}
       <div>
