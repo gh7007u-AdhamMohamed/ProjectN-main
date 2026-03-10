@@ -1,7 +1,28 @@
-import React from 'react'
-import { PlusIcon, SearchIcon, XIcon } from 'lucide-react'
+import React, { useState } from 'react'
+import { PlusIcon, SearchIcon, XIcon, WalletIcon, RefreshCwIcon } from 'lucide-react'
+import axios from 'axios'
 
 const NavbarR = ({ onAddClick, searchQuery, onSearch }) => {
+  const [walletBalance, setWalletBalance] = useState(null)
+  const [walletLoading, setWalletLoading] = useState(false)
+  const [walletError, setWalletError] = useState(null)
+
+  const handleWallet = async () => {
+    setWalletLoading(true)
+    setWalletError(null)
+    try {
+      const token = sessionStorage.getItem("token")
+      const { data } = await axios.get("http://localhost:5000/api/wallet", {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+    setWalletBalance(data.totalBalance ?? 0) 
+     } catch (err) {
+      setWalletError("Failed to load")
+    } finally {
+      setWalletLoading(false)
+    }
+  }
+
   return (
     <header className='bg-base-300 border-b border-base-content/10'>
       <div className='mx-auto max-w-6xl p-4'>
@@ -17,11 +38,10 @@ const NavbarR = ({ onAddClick, searchQuery, onSearch }) => {
             <input
               type='text'
               placeholder='Search receipts...'
-              value={searchQuery} // controlled from parent
-              onChange={(e) => onSearch(e.target.value)} // updates parent state
+              value={searchQuery}
+              onChange={(e) => onSearch(e.target.value)}
               className='bg-transparent outline-none w-full text-sm'
             />
-            {/* clear button — only shows when there is text */}
             {searchQuery && (
               <button onClick={() => onSearch('')}>
                 <XIcon className='size-4 text-base-content/40 hover:text-base-content' />
@@ -30,12 +50,35 @@ const NavbarR = ({ onAddClick, searchQuery, onSearch }) => {
           </div>
 
           <div className='flex items-center gap-4'>
+
+            {/* Wallet */}
+            <div className='flex items-center gap-2 bg-base-100 border border-base-300 rounded-xl px-4 py-2'>
+              <WalletIcon className='size-4 text-primary' />
+              {walletBalance !== null ? (
+                <span className='text-sm font-semibold text-base-content'>
+                  ${typeof walletBalance === 'number' ? walletBalance.toFixed(2) : walletBalance}
+                </span>
+              ) : walletError ? (
+                <span className='text-sm text-error'>{walletError}</span>
+              ) : (
+                <span className='text-sm text-base-content/40'>--</span>
+              )}
+              <button
+                onClick={handleWallet}
+                disabled={walletLoading}
+                className='ml-1 hover:text-primary transition-colors'
+                title='Refresh wallet'
+              >
+                <RefreshCwIcon className={`size-3.5 text-base-content/50 ${walletLoading ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
+
             <button onClick={onAddClick} className='btn btn-primary'>
               <PlusIcon className='size-5' />
               <span className='ml-2'>Add Payment Order</span>
             </button>
-          </div>
 
+          </div>
         </div>
       </div>
     </header>
