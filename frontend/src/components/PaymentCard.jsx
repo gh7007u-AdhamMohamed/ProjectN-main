@@ -40,14 +40,14 @@ const PaymentCard = ({ receipt, onDelete, onUpdate }) => {
   }
 
   return (
-    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+    <div className='grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-4'>
       {receipt.map((item) => {
         const isEditing = editingId === item._id
 
         return (
           <div
             key={item._id}
-            className='bg-base-100 border border-base-300 rounded-2xl p-5 flex flex-col gap-3 shadow-md'
+            className='max-w-4xl mx-auto w-full bg-base-100 border border-base-300 rounded-2xl p-5 flex flex-col gap-3 shadow-md'
           >
             {/* Header */}
             <div className='flex items-center justify-between'>
