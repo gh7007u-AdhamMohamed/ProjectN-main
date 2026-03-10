@@ -25,12 +25,7 @@ const addReceipt = async (req, res) => {
 
     await receipt.save();
 
-    await Wallet.findOneAndUpdate(
-      {},
-      { $inc: { totalBalance: -amount } },
-      { upsert: true }
-    );
-
+    
     res.status(201).json({ receipt, nextNumber });
 
   } catch (error) {
@@ -78,22 +73,15 @@ const updateReceipt = async (req,res) => {
     const findReceipt = await Receipt.findById(receiptid);
     if (!findReceipt) return res.status(404).json({ message: "Receipt not found" });
 
-    // Keep old amount if not provided
-    const newAmount = req.body.amount !== undefined ? req.body.amount : findReceipt.amount;
 
     const updatedReceipt = await Receipt.findByIdAndUpdate(
       receiptid,
-      { ...req.body, amount: newAmount },
+      { ...req.body },
       { new: true }
     );
 
-    const updateWallet = await Wallet.findOneAndUpdate(
-      {},
-      { $inc: { totalBalance: findReceipt.amount - updatedReceipt.amount } },
-      { new: true, upsert: true }
-    );
-
-    res.status(200).json({ updatedReceipt, updateWallet });
+   
+    res.status(200).json({ updatedReceipt });
 
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -109,12 +97,8 @@ const deleteReceipt = async(req,res)=>{
             return res.status(404).json({ message: "Receipt not found" });
         }
 
-        const updatewallet = await Wallet.findOneAndUpdate(
-            {},
-            { $inc: { totalBalance: +deletedReceipt.amount } },
-            { upsert: true }
-          );
-            res.status(200).json({ message: "Receipt deleted successfully", deletedReceipt, updatewallet });
+        
+            res.status(200).json({ message: "Receipt deleted successfully", deletedReceipt });
 
     } catch (error) {
         res.status(500).json({ message: error.message });
