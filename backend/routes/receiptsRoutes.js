@@ -15,5 +15,6 @@ router.put('/:id', verifyToken, allowed('admin'), receiptController.updateReceip
 router.delete('/:id', verifyToken, allowed('admin'), receiptController.deleteReceipt);
 router.post('/wallet', verifyToken, allowed('admin'), receiptController.updateWallet);
 router.get('/wallet', verifyToken, allowed('admin'), receiptController.getWallet);
-
+router.patch("/:id/purchase", verifyToken, allowed('admin'), receiptController.togglePurchase);
+router.patch("/:id/approval", verifyToken, allowed('superUser'), receiptController.toggleApproval);
 export default router;

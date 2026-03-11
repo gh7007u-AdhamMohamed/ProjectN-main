@@ -5,22 +5,32 @@ import CreateFile from './pages/CreateFile'
 import { LoginPage } from './pages/LoginPage'
 import HomeReceipt from './pages/HomeReceipt'
 import ProtectedRoute from './components/ProtectedRoute'
+import { Toaster } from 'react-hot-toast';
 
-//import { toast } from 'react-hot-toast'
 const App = () => {
   return (
-    //  themes: ["light", "dark", "forest", "cupcake", "bumblebee", "emerald", "corporate", "synthwave", "retro", "cyberpunk", "valentine", "halloween", "garden", "forest", "aqua", "lofi", "pastel", "fantasy", "wireframe", "black", "luxury", "dracula"],
+    <div data-theme="forest" className="min-h-screen">
+      <Toaster position="top-right"
+        toastOptions={{
+          style: {
+            background: '#1b2818', 
+            color: '#fff',
+            border: '1px solid #324d2c',
+          },
+          success: {
+            iconTheme: {
+              primary: '#21ad06', 
+              secondary: '#fff',
+            },
+          },}}
+     />
 
-    <div data-theme="forest" >
-  <Routes>
-
-<Route path='/receipts' element={<ProtectedRoute><HomeReceipt /></ProtectedRoute>} />
-    <Route path='/' element={<LoginPage />} />
-    <Route path='/home' element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
-    <Route path='/create-file' element={<ProtectedRoute><CreateFile /></ProtectedRoute>} />
-
-  </Routes>
-
+      <Routes>
+        <Route path='/' element={<LoginPage />} />
+        <Route path='/receipts' element={<ProtectedRoute><HomeReceipt /></ProtectedRoute>} />
+        <Route path='/home' element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+        <Route path='/create-file' element={<ProtectedRoute><CreateFile /></ProtectedRoute>} />
+      </Routes>
     </div>
   )
 }

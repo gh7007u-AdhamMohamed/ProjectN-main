@@ -1,7 +1,6 @@
 import File from "../models/files.model.js";
 import mongoose from "mongoose";
-import { Receipt, Wallet, Counter } from "../models/receipt.model.js";
-
+import { Receipt, Wallet, Counter, History } from "../models/receipt.model.js"; // Added History
 
 const addReceipt = async (req, res) => {
   try {
@@ -91,6 +90,8 @@ const updateReceipt = async (req,res) => {
 const deleteReceipt = async(req,res)=>{
     try {
        const receiptId=req.params.id;
+       const receipt=await Receipt.findById(receiptId);
+       if(!receipt.purchased){
        const deletedReceipt = await Receipt.findByIdAndDelete(receiptId);
 
         if (!deletedReceipt) {
@@ -99,7 +100,10 @@ const deleteReceipt = async(req,res)=>{
 
         
             res.status(200).json({ message: "Receipt deleted successfully", deletedReceipt });
-
+      }
+      else
+      {
+        res.status(403).json({ message: "Cannot delete purchased receipt" });      }
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -140,6 +144,20 @@ const updateWallet = async(req,res)=>{
     res.status(500).json({ message: error.message });
   }
 };
+const resetWallet = async (req, res) => {
+  try {
+    const wallet = await Wallet.findOneAndUpdate(
+      {}, 
+      { $set: { totalBalance: 0 } }, 
+      { new: true, upsert: true }
+    );
+    
+    res.json(wallet);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 
 const getWallet = async(req,res)=>{
   try {
@@ -184,6 +202,45 @@ const changeApprovalStatus = async (req, res) => {
     }
 
 ;}
+const togglePurchase = async (req, res) => {
+  try {
+    const receipt = await Receipt.findById(req.params.id);
+    if (!receipt) return res.status(404).json({ message: "Receipt not found" });
+
+    if (!receipt.purchased) {
+      await Wallet.findOneAndUpdate({}, { $inc: { totalBalance: -receipt.amount } }, { upsert: true });
+      await History.create({ receiptId: receipt._id, amount: receipt.amount });
+      await Receipt.findByIdAndUpdate(req.params.id, { purchased: true });
+    } else {
+      await Wallet.findOneAndUpdate({}, { $inc: { totalBalance: receipt.amount } }, { upsert: true });
+      await History.findOneAndDelete({ receiptId: receipt._id });
+      await Receipt.findByIdAndUpdate(req.params.id, { purchased: false });
+    }
+  const updatedReceipt = await Receipt.findById(req.params.id);
+  res.status(200).json({ purchased: updatedReceipt.purchased });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+const toggleApproval = async (req, res) => {
+  try {
+    const receipt = await Receipt.findById(req.params.id);
+    if (!receipt) return res.status(404).json({ message: "Receipt not found" });
+
+    const newStatus = receipt.approvalStatus === "approved" ? "pending" : "approved";
+
+    const updated = await Receipt.findByIdAndUpdate(
+      req.params.id,
+      { approvalStatus: newStatus },
+      { new: true }
+    );
+
+    res.status(200).json({ approvalStatus: updated.approvalStatus });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 export default {
     addReceipt,
@@ -195,5 +252,7 @@ export default {
     searchReceipts,
     updateWallet,
     getWallet,
-    changeApprovalStatus
+    changeApprovalStatus,
+    togglePurchase,
+    toggleApproval
 };

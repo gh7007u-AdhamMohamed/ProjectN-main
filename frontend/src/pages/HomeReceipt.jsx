@@ -38,6 +38,14 @@ const filteredReceipts = receipt.filter((item) =>
 
     fetchNotes();
   }, []);
+  const [walletRefresh, setWalletRefresh] = useState(0)
+  
+const handleUpdate = async () => {
+  setWalletRefresh(walletRefresh + 1)
+  const res = await axios.get("http://localhost:5000/api/receipt/")
+  setReceipt(res.data)
+}
+  
 const handleDelete = async (id)=>{
   try{
     const token = sessionStorage.getItem("token"); 
@@ -68,15 +76,17 @@ const handleAddReceipt = async () => {
   }
 }
 
-const handleUpdate = async () => {
-  const res = await axios.get('http://localhost:5000/api/receipt/')
-  setReceipt(res.data)
-}
+
   
   return (
     <div className='min-h-screen'>
-<NavbarR onAddClick={() => setShowModal(true)} searchQuery={searchQuery} onSearch={setSearchQuery} />
-   {showModal && (
+<NavbarR 
+  onAddClick={() => setShowModal(true)} 
+  searchQuery={searchQuery} 
+  onSearch={setSearchQuery} 
+  walletRefresh={walletRefresh}  // 👈 add this
+/>  
+ {showModal && (
         <div className='fixed inset-0 bg-black/50 flex items-center justify-center z-50'>
           <div className='bg-base-100 border border-base-300 rounded-2xl p-6 w-full max-w-md'>
 
