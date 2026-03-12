@@ -24,8 +24,14 @@ const walletSchema = new mongoose.Schema({
 
 });
 const historySchema = new mongoose.Schema({
-  receiptId: { type: mongoose.Schema.Types.ObjectId, ref: "Receipt", required: true },
+  receiptId: { type: mongoose.Schema.Types.ObjectId, ref: "Receipt",default:null },
   amount: { type: Number, required: true },
+    type: {
+    type: String,
+    enum: ["purchase", "addMoney","reset"],
+    required: true,
+    default:"purchase"
+  },
   date: { type: Date, default: Date.now }
 }, { timestamps: true });
 

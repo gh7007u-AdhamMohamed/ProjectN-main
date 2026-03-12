@@ -140,12 +140,20 @@ const updateWallet = async(req,res)=>{
         { new: true, upsert: true }
     );
     res.json(wallet);
+    const history = await History.create({
+      amount,
+      type: "addMoney"})
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 const resetWallet = async (req, res) => {
   try {
+     const wallett = await Wallet.findOne({});
+     await History.create({
+      amount:wallett.totalBalance,
+      type:"reset"
+     })
     const wallet = await Wallet.findOneAndUpdate(
       {}, 
       { $set: { totalBalance: 0 } }, 
@@ -254,5 +262,6 @@ export default {
     getWallet,
     changeApprovalStatus,
     togglePurchase,
-    toggleApproval
+    toggleApproval,
+    resetWallet
 };
