@@ -1,6 +1,6 @@
 import File from "../models/files.model.js";
 import mongoose from "mongoose";
-import { Receipt, Wallet, Counter, History } from "../models/receipt.model.js"; // Added History
+import { Receipt, Wallet, Counter, History ,Item} from "../models/receipt.model.js"; // Added History
 
 const addReceipt = async (req, res) => {
   try {
@@ -258,7 +258,26 @@ const toggleApproval = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+const addItems = async (req, res) => {
+  try {
+    const items = req.body; 
+    const newItems = await Item.insertMany(items);
+    res.status(201).json(newItems);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+const deleteItem=async(req,res)=>{
+try{
+    const id=req.params.id
+    const item =await Item.findByIdAndDelete(id);
+    res.status(200).json(item);
 
+}catch(err){
+        res.status(500).json({ message: err.message });
+
+}
+}
 export default {
     addReceipt,
     getAllReceipts,
@@ -272,5 +291,7 @@ export default {
     changeApprovalStatus,
     togglePurchase,
     toggleApproval,
-    resetWallet
+    resetWallet,
+    addItems,
+    deleteItem
 };

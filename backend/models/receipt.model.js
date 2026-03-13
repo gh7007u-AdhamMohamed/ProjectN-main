@@ -9,10 +9,7 @@ const receiptSchema = new mongoose.Schema({
   name: { type: String, required: true },
   description: { type: String, default: "" }, 
   amount: { type: Number, required: true },
-  category: { 
-    type: String, 
-    required: true 
-  },
+  
   purchased: { type: Boolean, default: false },
   approvalStatus: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
   date: { type: Date, required: true ,index: true},
@@ -40,6 +37,14 @@ const counterSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
   seq: { type: Number, default: 0 }
 });
+const itemSchema =new mongoose.Schema({
+    receiptId: { type: mongoose.Schema.Types.ObjectId, ref: "Receipt",required: true },
+    count:{type:Number,required:true,default:1},
+    description:{type:String,required:true},
+    price:{type:Number,required:true}
+
+})
+const Item=mongoose.model("Item",itemSchema);
 
 const Counter = mongoose.model("Counter", counterSchema);
 
@@ -52,4 +57,4 @@ const Category = mongoose.model("Category", categorySchema);
 const Receipt = mongoose.model("Receipt", receiptSchema);
 const Wallet = mongoose.model("Wallet", walletSchema);
 
-export { Category, Receipt, Wallet, Counter, History };
+export { Category, Receipt, Wallet, Counter, History,Item };

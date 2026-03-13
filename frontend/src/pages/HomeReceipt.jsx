@@ -5,8 +5,10 @@ import { PlusIcon, SearchIcon, Trash2Icon, PencilIcon, ClipboardList } from 'luc
 import axios from 'axios'
 import PaymentCard from '../components/PaymentCard'
 import { useNavigate } from 'react-router-dom';
+import toast, { Toaster } from 'react-hot-toast'
 
 const ReceiptsPage = () => {
+const [items, setItems] = useState([])
 
 const [receipt, setReceipt] = useState([]);
 const role = sessionStorage.getItem('role') 
@@ -17,7 +19,10 @@ const [formData, setFormData] = useState({
   description: '',
   amount: '',
   category: '',
-  date: ''
+  date: '',
+  count: '',
+  price: '',
+  dis:''
 })
 const navigate = useNavigate();
 const filteredReceipts = receipt.filter((item) =>
@@ -31,7 +36,6 @@ const filteredReceipts = receipt.filter((item) =>
     const fetchNotes = async () => {
       try {
         const res = await axios.get("http://localhost:5000/api/receipt/");
-        console.log(res.data);
         setReceipt(res.data);
       } catch (err) {
         console.log(err);
@@ -47,7 +51,7 @@ const handleUpdate = async () => {
   const res = await axios.get("http://localhost:5000/api/receipt/")
   setReceipt(res.data)
 }
-  
+
 const handleDelete = async (id)=>{
   try{
     const token = sessionStorage.getItem("token"); 
@@ -64,14 +68,23 @@ const handleDelete = async (id)=>{
 }
 const handleAddReceipt = async () => {
   try {
+   const am=items.reduce((sum, item) => sum + item.count * item.price, 0);
+  if(am === 0) {
+  toast.error('أضف عناصر أولاً')
+  return  
+}
+    await axios.post('http://localhost:5000/api/receipt/', {...formData,
+    amount:am,
+    description: items.map(i => `[السعر: ${i.price} جنيه] [العدد: ${i.count}] [الصنف: ${i.description}]`
+).join('   , ')
 
-    await axios.post('http://localhost:5000/api/receipt/', formData)
+    })
 
     setShowModal(false) 
   
     const res = await axios.get('http://localhost:5000/api/receipt/')
     setReceipt(res.data)
-
+     setItems([])
   } catch (err) {
     console.log(err)
     alert('Failed to add receipt')
@@ -82,11 +95,12 @@ const handleAddReceipt = async () => {
   
   return (
     <div className='min-h-screen'>
+      <Toaster position="top-center" />
 <NavbarR 
   onAddClick={() => setShowModal(true)} 
   searchQuery={searchQuery} 
   onSearch={setSearchQuery} 
-  walletRefresh={walletRefresh}  // 👈 add this
+  walletRefresh={walletRefresh}  
 />  
  {showModal && (
         <div className='fixed inset-0 bg-black/50 flex items-center justify-center z-50'>
@@ -104,34 +118,50 @@ const handleAddReceipt = async () => {
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
         />
-        <input
-          type='text'
-          placeholder='Description'
-          className='input input-bordered w-full'
-          value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value 
-            
-          })}
-        />
+        
+          <div className="flex gap-2">
+            <input
+              type="number"
+              placeholder="Count"
+              className="input input-bordered w-1/4"
+              value={formData.count}
+              onChange={(e) => setFormData({ ...formData, count: e.target.value })}
+            />
+            <input
+              type="text"
+              placeholder="Description"
+              className="input input-bordered w-full"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            />
+            <input
+              type="number"
+              placeholder="Price"
+              className="input input-bordered w-1/4"
+              value={formData.price}
+              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+            />
+            <button
+              className="btn btn-primary btn-square"
+              onClick={() => {
+                if (!formData.count || !formData.description || !formData.price) return
+                setItems([...items, { count: formData.count, description: formData.description, price: formData.price, }])
+                setFormData({ ...formData, count: '', description: '', price: '' }) 
+              }}
+            >
+              <PlusIcon className="size-4" />
+            </button>
+          </div>
         <input
           type='number'
-         
-          placeholder='Amount'
+          placeholder='totalSum'
           className='input input-bordered w-full'
-          value={formData.amount}
-          onChange={(e) =>{
-            const val=e.target.value
-            if (val >= 0) {
-              setFormData({ ...formData, amount: val });
-         }}}
+          readOnly
+          value={items.reduce((sum, item) => sum + item.count * item.price, 0)}
+
+          
         />
-        <input
-          type='text'
-          placeholder='Category'
-          className='input input-bordered w-full'
-          value={formData.category}
-          onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-        />
+
         <input
           type='date'
           className='input input-bordered w-full'
@@ -144,7 +174,8 @@ const handleAddReceipt = async () => {
               <button onClick={handleAddReceipt} className='btn btn-primary flex-1'>
               Add
               </button>
-              <button onClick={() => setShowModal(false)} className='btn btn-ghost flex-1'>Cancel</button>
+              <button onClick={() =>{ setShowModal(false)
+                setItems([])} }className='btn btn-ghost flex-1'>Cancel</button>
             </div>
 
           </div>
