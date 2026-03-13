@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react'
 import { useState } from 'react'
 import NavbarR from '../components/NavbarR'
-import { PlusIcon, SearchIcon, Trash2Icon, PencilIcon } from 'lucide-react'
+import { PlusIcon, SearchIcon, Trash2Icon, PencilIcon, ClipboardList } from 'lucide-react'
 import axios from 'axios'
 import PaymentCard from '../components/PaymentCard'
+import { useNavigate } from 'react-router-dom';
 
 const ReceiptsPage = () => {
 
@@ -18,6 +19,7 @@ const [formData, setFormData] = useState({
   category: '',
   date: ''
 })
+const navigate = useNavigate();
 const filteredReceipts = receipt.filter((item) =>
   item.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
   item.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -107,14 +109,21 @@ const handleAddReceipt = async () => {
           placeholder='Description'
           className='input input-bordered w-full'
           value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          onChange={(e) => setFormData({ ...formData, description: e.target.value 
+            
+          })}
         />
         <input
           type='number'
+         
           placeholder='Amount'
           className='input input-bordered w-full'
           value={formData.amount}
-          onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+          onChange={(e) =>{
+            const val=e.target.value
+            if (val >= 0) {
+              setFormData({ ...formData, amount: val });
+         }}}
         />
         <input
           type='text'
@@ -146,7 +155,12 @@ const handleAddReceipt = async () => {
 <PaymentCard receipt={filteredReceipts} onDelete={handleDelete} onUpdate={handleUpdate} />
 
 
-      </div>
+  <button 
+      onClick={() => navigate("/report")} 
+      className="fixed bottom-10 right-10 z-50 btn btn-secondary btn-circle size-16 shadow-lg"
+    >
+      <ClipboardList size={28} />
+    </button>      </div>
     </div>
   )
 }

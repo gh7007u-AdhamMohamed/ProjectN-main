@@ -3,6 +3,7 @@ import User from "../models/user.model.js";
  import bcrypt from "bcrypt";
  import jwt from "jsonwebtoken";
  import dotenv from "dotenv";
+ dotenv.config();
 const getAllUsers = async(req,res)=>{
     try {
         const users = await User.find({}, { __v: 0, password: 0 });

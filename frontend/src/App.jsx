@@ -6,7 +6,7 @@ import { LoginPage } from './pages/LoginPage'
 import HomeReceipt from './pages/HomeReceipt'
 import ProtectedRoute from './components/ProtectedRoute'
 import { Toaster } from 'react-hot-toast';
-
+import Report from './pages/Report'
 const App = () => {
   return (
     <div data-theme="forest" className="min-h-screen">
@@ -27,6 +27,7 @@ const App = () => {
 
       <Routes>
         <Route path='/' element={<LoginPage />} />
+        <Route path='/report' element={<ProtectedRoute><Report /></ProtectedRoute>} />
         <Route path='/receipts' element={<ProtectedRoute><HomeReceipt /></ProtectedRoute>} />
         <Route path='/home' element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
         <Route path='/create-file' element={<ProtectedRoute><CreateFile /></ProtectedRoute>} />

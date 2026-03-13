@@ -34,7 +34,7 @@ const addReceipt = async (req, res) => {
 
 const getAllReceipts = async(req,res)=>{
     try{
-        const receipts = await Receipt.find();
+        const receipts = await Receipt.find().sort({ createdAt: -1 });
         res.json(receipts);
     }catch (error) {
         res.status(500).json({ message: error.message });}  
@@ -178,14 +178,19 @@ const getWallet = async(req,res)=>{
 
 const getReceiptReport = async (req, res) => {
   try {
-    const { startDate, endDate } = req.query;
+    const { receipeNumber, endNumber } = req.query;
     const receipts = await Receipt.find({
-      date: {
-        $gte: new Date(startDate),
-        $lte: new Date(endDate)
+      receiptNumber: {
+        $gte: receipeNumber,
+        $lte: endNumber
+
       }
-    }).sort({ date: -1 });
-    res.json(receipts);
+    });
+    let sum =0;
+    receipts.map((x)=> sum+=x.amount)
+    res.json({
+      data: receipts,
+      totalAmount: sum});
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -216,16 +221,20 @@ const togglePurchase = async (req, res) => {
     if (!receipt) return res.status(404).json({ message: "Receipt not found" });
 
     if (!receipt.purchased) {
-      await Wallet.findOneAndUpdate({}, { $inc: { totalBalance: -receipt.amount } }, { upsert: true });
-      await History.create({ receiptId: receipt._id, amount: receipt.amount });
-      await Receipt.findByIdAndUpdate(req.params.id, { purchased: true });
+      await Promise.all([
+        Wallet.findOneAndUpdate({}, { $inc: { totalBalance: -receipt.amount } }, { upsert: true }),
+        History.create({ receiptId: receipt._id, amount: receipt.amount }),
+        Receipt.findByIdAndUpdate(req.params.id, { purchased: true })
+      ]);
+       return res.status(200).json({ purchased: true });
     } else {
-      await Wallet.findOneAndUpdate({}, { $inc: { totalBalance: receipt.amount } }, { upsert: true });
-      await History.findOneAndDelete({ receiptId: receipt._id });
-      await Receipt.findByIdAndUpdate(req.params.id, { purchased: false });
-    }
-  const updatedReceipt = await Receipt.findById(req.params.id);
-  res.status(200).json({ purchased: updatedReceipt.purchased });
+      await Promise.all([
+        Wallet.findOneAndUpdate({}, { $inc: { totalBalance: receipt.amount } }, { upsert: true }),
+        History.findOneAndDelete({ receiptId: receipt._id }),
+        Receipt.findByIdAndUpdate(req.params.id, { purchased: false })
+      ]);
+    return res.status(200).json({ purchased: false });
+ }
 
   } catch (error) {
     res.status(500).json({ message: error.message });
