@@ -7,9 +7,12 @@ import HomeReceipt from './pages/HomeReceipt'
 import ProtectedRoute from './components/ProtectedRoute'
 import { Toaster } from 'react-hot-toast';
 import Report from './pages/Report'
+import Registerpage from './pages/Registerpage'
+import Aboutpage from './pages/Aboutpage'
+
 const App = () => {
   return (
-    <div data-theme="forest" className="min-h-screen">
+    <div data-theme="dracula" className="min-h-screen">
       <Toaster position="top-right"
         toastOptions={{
           style: {
@@ -31,6 +34,8 @@ const App = () => {
         <Route path='/receipts' element={<ProtectedRoute><HomeReceipt /></ProtectedRoute>} />
         <Route path='/home' element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
         <Route path='/create-file' element={<ProtectedRoute><CreateFile /></ProtectedRoute>} />
+        <Route path='/register' element={<ProtectedRoute><Registerpage /></ProtectedRoute>} />
+         <Route path='/about' element={<Aboutpage />} />
       </Routes>
     </div>
   )

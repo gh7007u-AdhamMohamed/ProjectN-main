@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { PlusIcon, SearchIcon, XIcon, WalletIcon, RefreshCwIcon } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-
+import { useNavigate } from 'react-router-dom'
+import { UserPlusIcon, InfoIcon } from 'lucide-react'
 const NavbarR = ({ onAddClick, searchQuery, onSearch, walletRefresh }) => {
   const [addLoading, setAddLoading] = useState(false);
   const [addAmount, setAddAmount] = useState('');
@@ -166,7 +167,7 @@ const NavbarR = ({ onAddClick, searchQuery, onSearch, walletRefresh }) => {
             {role !== 'superUser' && (
               <button onClick={onAddClick} className="btn btn-primary btn-sm md:btn-md rounded-xl shadow-sm">
                 <PlusIcon className="size-5" />
-                <span className="hidden sm:inline ml-1">Add Order</span>
+                <span className="hidden sm:inline ml-1">أضافه أمر صرف</span>
               </button>
             )}
             

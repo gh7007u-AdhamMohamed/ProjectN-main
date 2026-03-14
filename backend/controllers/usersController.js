@@ -15,7 +15,7 @@ const getAllUsers = async(req,res)=>{
 };
 
 const register= async(req,res,next)=>{
-    const {firstName,lastName,email,password,role}=req.body;
+  const { firstName = '', lastName = '', email, password, role } = req.body
     const olduser=await User.findOne({email})
     if(olduser){
         return res.status(400).json({status:"error",message:"User already exists"});
@@ -41,7 +41,7 @@ console.log(token);
 }
 
 const login= async(req,res,next)=>{
-    const {email,password}=req.body;
+    const {email,password,firstName}=req.body;
     if(!email || !password){
         return res.status(400).json({status:"error",message:"Email and password are required"});
     }

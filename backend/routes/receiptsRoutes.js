@@ -20,5 +20,7 @@ router.patch("/:id/approval", verifyToken, allowed('superUser'), receiptControll
 router.post("/wallet/reset", verifyToken, allowed('admin'), receiptController.resetWallet);
 router.post('/item',receiptController.addItems);
 router.delete('/item',receiptController.deleteItem);
+router.get('/item',receiptController.getItems);
+router.get('/history', receiptController.getHistory)
 
 export default router;

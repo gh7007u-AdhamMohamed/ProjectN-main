@@ -3,11 +3,11 @@ import validator from "validator";
 const userSchema = new mongoose.Schema({ 
        firstName: {
         type: String,
-        required: true,}
+        required: false,}
         ,
        lastName: {
         type: String,
-       required: true,},
+       required: false,},
        email: {
         type: String,
         required: true,
