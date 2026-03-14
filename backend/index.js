@@ -6,7 +6,8 @@ import File from "./models/files.model.js";
 import cors from "cors";
 import usersRoutes from "./routes/usersRoutes.js";
 import receiptRoutes from "./routes/receiptsRoutes.js";
-
+import { createServer } from 'http'
+import { Server } from 'socket.io'
 import dotenv from "dotenv";
 dotenv.config();
 const url = 'mongodb+srv://gh7007u_db_user:FileManger54@learnmongodb.xxuuapt.mongodb.net/FileManger';
@@ -28,12 +29,20 @@ const app = express();
 //middleware to parse json body
 app.use(express.json()); 
 app.use(cors({origin:"http://localhost:5173"}));
+const httpServer = createServer(app) 
+const io = new Server(httpServer, {
+  cors: { origin: "*" } 
+})
+app.use((req, res, next) => {
+  req.io = io
+  next()
+})
 app.use('/api/file',filesRoutes);
 app.use('/api/users',usersRoutes);
 app.use('/api/receipt',receiptRoutes);
 
 
 //server listening on port 5000
-app.listen(5000, () => {
+httpServer.listen(5000, () => {
   console.log("Listening on port: 5000");
 });

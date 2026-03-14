@@ -23,7 +23,7 @@ const addReceipt = async (req, res) => {
     });
 
     await receipt.save();
-
+    req.io.emit('newReceipt', receipt)
     
     res.status(201).json({ receipt, nextNumber });
 
@@ -209,7 +209,9 @@ const changeApprovalStatus = async (req, res) => {
             { approvalStatus },
             { new: true }
         );
+        req.io.emit('approvalUpdated', updated)
         res.json(updatedReceipt);
+        
     }catch (error) {
         res.status(500).json({ message: error.message });   
     }
@@ -252,7 +254,7 @@ const toggleApproval = async (req, res) => {
       { approvalStatus: newStatus },
       { new: true }
     );
-
+    req.io.emit('approvalUpdated', updated)
     res.status(200).json({ approvalStatus: updated.approvalStatus });
   } catch (error) {
     res.status(500).json({ message: error.message });

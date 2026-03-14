@@ -6,7 +6,7 @@ import axios from 'axios'
 import PaymentCard from '../components/PaymentCard'
 import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast'
-
+import { io } from 'socket.io-client'
 const ReceiptsPage = () => {
 const [items, setItems] = useState([])
 
@@ -44,6 +44,29 @@ const filteredReceipts = receipt.filter((item) =>
 
     fetchNotes();
   }, []);
+    
+  useEffect(() => {
+    const socket = io('http://localhost:5000') 
+
+    socket.on('newReceipt', (newReceipt) => {
+      setReceipt(prev => [newReceipt, ...prev]) 
+      document.title = '🔔 تم اصدار امر صرف!'          
+    })
+    socket.on('approvalUpdated', (updated) => {
+      setReceipt(prev =>                        
+        prev.map(r => r._id === updated._id ? updated : r)
+      )
+       console.log('approvalUpdated received', updated)
+
+      document.title = '🔔    الموافقه علي امر صرف!' 
+    })
+
+    window.addEventListener('focus', () => {
+      document.title = 'Your App Name'          
+    })
+
+    return () => socket.disconnect()            
+  }, [])
   const [walletRefresh, setWalletRefresh] = useState(0)
   
 const handleUpdate = async () => {
