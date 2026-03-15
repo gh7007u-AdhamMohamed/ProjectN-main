@@ -52,7 +52,10 @@ receiptSchema.index(
   { description: "text", name: "text" }, 
   { default_language: "arabic" } 
 );
-
+// receipt.model.js
+itemSchema.index({ receiptId: 1 })       
+receiptSchema.index({ createdAt: -1 })    
+receiptSchema.index({ receiptNumber: 1 }) 
 const Category = mongoose.model("Category", categorySchema);
 const Receipt = mongoose.model("Receipt", receiptSchema);
 const Wallet = mongoose.model("Wallet", walletSchema);

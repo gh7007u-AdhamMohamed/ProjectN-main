@@ -2,7 +2,7 @@ import React from 'react'
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-
+import BASE_URL from '../config' 
 export const LoginPage = () => {
    const navigate = useNavigate()
    const [formData, setFormData] = useState({
@@ -13,8 +13,7 @@ export const LoginPage = () => {
     e.preventDefault();
 
     try {
-      const res = await axios.post('http://localhost:5000/api/users/login', formData)
-
+      const res = await axios.post(`${BASE_URL}/api/users/login`, formData)
       sessionStorage.setItem('token', res.data.token)
       sessionStorage.setItem('role', res.data.data.role)
 

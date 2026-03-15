@@ -6,7 +6,7 @@ import PaymentCard from '../components/PaymentCard'
 import { useNavigate } from 'react-router-dom'
 import toast, { Toaster } from 'react-hot-toast'
 import { io } from 'socket.io-client'
-
+import BASE_URL from '../config' 
 import { UserPlusIcon, InfoIcon } from 'lucide-react'
 
 // ↓ paste here, above ReceiptsPage
@@ -62,7 +62,7 @@ const ReceiptsPage = () => {
   useEffect(() => {
     const fetchReceipts = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/receipt/')
+        const res = await axios.get(`${BASE_URL}/api/receipt/`)
         setReceipt(res.data)
       } catch (err) {
         console.log(err)
@@ -73,7 +73,7 @@ const ReceiptsPage = () => {
 
   // ── Socket ───────────────────────────────────────────────────────
   useEffect(() => {
-    const socket = io('http://localhost:5000')
+    const socket = io('http://10.10.10.46:5000')
     socket.on('newReceipt', (r) => {
       setReceipt(prev => [r, ...prev])
       document.title = '🔔 تم اصدار امر صرف!'
@@ -89,14 +89,14 @@ const ReceiptsPage = () => {
   // ── Handlers ─────────────────────────────────────────────────────
   const handleUpdate = async () => {
     setWalletRefresh(c => c + 1)
-    const res = await axios.get('http://localhost:5000/api/receipt/')
+    const res = await axios.get(`${BASE_URL}/api/receipt/`)
     setReceipt(res.data)
   }
 
   const handleDelete = async (id) => {
     try {
       const token = sessionStorage.getItem('token')
-      await axios.delete(`http://localhost:5000/api/receipt/${id}`, {
+      await axios.delete(`${BASE_URL}/api/receipt/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       setReceipt(prev => prev.filter(r => r._id !== id))
@@ -125,7 +125,7 @@ const ReceiptsPage = () => {
     if (!formHeader.name)  { toast.error('أدخل اسم الطلب');  return }
     if (!formHeader.date)  { toast.error('اختر التاريخ');     return }
     try {
-      await axios.post('http://localhost:5000/api/receipt/', {
+      await axios.post(`${BASE_URL}/api/receipt/`, {
         name: formHeader.name,
         date: formHeader.date,
         items: formItems,
@@ -133,7 +133,7 @@ const ReceiptsPage = () => {
       setShowModal(false)
       setFormHeader({ name: '', date: '' })
       setFormItems([])
-      const res = await axios.get('http://localhost:5000/api/receipt/')
+      const res = await axios.get(`${BASE_URL}/api/receipt/`)
       setReceipt(res.data)
     } catch (err) {
       console.log(err)
@@ -147,7 +147,17 @@ const ReceiptsPage = () => {
     setFormItems([])
     setNewRow({ count: '', description: '', price: '' })
   }
+const handleNameChange = (e) => {
+  const value = e.target.value;
 
+  const arabicRegex = /^[\u0600-\u06FF\s]*$/;
+
+  if (arabicRegex.test(value)) {
+    setFormHeader({ ...formHeader, name: value });
+  } else {
+    toast.error("الرجاء إدخال أسماء عربية فقط" ,{ id: "arabic-warning" });
+  }
+};
   return (
     
     <div className="min-h-screen">
@@ -171,16 +181,17 @@ const ReceiptsPage = () => {
               {/* Name */}
               <input
                 type="text"
-                placeholder="Name"
+                placeholder="لصالح"
                 className="input input-bordered w-full"
                 value={formHeader.name}
-                onChange={(e) => setFormHeader({ ...formHeader, name: e.target.value })}
+                onChange={handleNameChange}
               />
 
               {/* Item input row */}
               <div className="flex gap-2" dir="rtl">
                 <input
                   type="number"
+                  
                   placeholder="العدد"
                   className="input input-bordered w-1/4"
                   value={newRow.count}
@@ -250,13 +261,15 @@ const ReceiptsPage = () => {
 
       <div className="w-full px-6 mt-6">
         <PaymentCard receipt={filteredReceipts} onDelete={handleDelete} onUpdate={handleUpdate} />
+        
         <FlexButtons />
+        {role==='admin'&&(
         <button
           onClick={() => navigate('/report')}
           className="fixed bottom-10 right-10 z-50 btn btn-secondary btn-circle size-16 shadow-lg"
         >
           <ClipboardList size={28} />
-        </button>
+        </button>)}
       </div>
     </div>
   )

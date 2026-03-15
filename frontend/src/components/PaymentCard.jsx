@@ -4,7 +4,7 @@ import {
   ShoppingCartIcon, Undo2Icon, PlusIcon
 } from 'lucide-react'
 import axios from 'axios'
-
+import BASE_URL from '../config' 
 const PaymentCard = ({ receipt, onDelete, onUpdate }) => {
   const role = sessionStorage.getItem('role')
   const [editingId, setEditingId] = useState(null)
@@ -12,7 +12,111 @@ const PaymentCard = ({ receipt, onDelete, onUpdate }) => {
   const [editItems, setEditItems] = useState([])      // [{ _id?, count, description, price }]
   const [newItem, setNewItem] = useState({ count: '', description: '', price: '' })
   const [loadingId, setLoadingId] = useState(null)
+const handlePrint = (item) => {
+  const win = window.open('', '_blank', 'width=800,height=600')
+  win.document.write(`
+    <!DOCTYPE html><html><head>
+    <meta charset="utf-8"/>
+    <title>امر صرف #${item.receiptNumber}</title>
+    <style>
+      *{box-sizing:border-box;margin:0;padding:0}
+      body{font-family:'Segoe UI',sans-serif;background:#fff;color:#0d1b2a;padding:32px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+      .wrap{max-width:680px;margin:0 auto}
+      .header{background:#0d1b2a;color:#fff;padding:20px 28px;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:center}
+      .header .title{font-size:20px;font-weight:800}
+      .header .meta{font-size:11px;opacity:.6;text-align:right;line-height:1.8}
+      .stripe{height:4px;background:linear-gradient(90deg,#2e86ab,#00c6ae,#f4a261);margin-bottom:24px}
+      .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+      .info-box{border:1px solid #e8eef4;border-radius:8px;padding:12px 16px}
+      .info-box .lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#6b7e94;margin-bottom:3px}
+      .info-box .val{font-size:14px;font-weight:600;color:#0d1b2a}
+      .badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase}
+      .badge-approved{background:#d4edda;color:#155724}
+      .badge-pending{background:#fff3cd;color:#856404}
+      .badge-purchased{background:#d1ecf1;color:#0c5460}
+      .section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#6b7e94;margin-bottom:8px;padding-bottom:6px;border-bottom:1.5px solid #e8eef4}
+      table{width:100%;border-collapse:collapse;font-size:13px;direction:rtl}
+      thead tr{background:#0d1b2a}
+      thead th{padding:9px 14px;font-weight:600;font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:#fff;text-align:right}
+      thead th:last-child{text-align:left}
+      tbody tr:nth-child(even){background:#f8fafc}
+      tbody tr{border-bottom:1px solid #e8eef4}
+      tbody td{padding:9px 14px;text-align:right}
+      tbody td:last-child{text-align:left;font-weight:700;color:#1e3a5f}
+      .total-row{background:#0d1b2a!important}
+      .total-row td{color:#fff!important;font-weight:700;font-size:15px;padding:12px 14px}
+      .footer{text-align:center;font-size:10px;color:#a0adb8;margin-top:24px;padding-top:14px;border-top:1px solid #e8eef4}
+    </style>
+    </head><body><div class="wrap">
+      <div class="header">
+        <div class="title">🧾 امر صرف</div>
+        <div class="meta">
+          رقم الامر: #${item.receiptNumber}<br/>
+          ${new Date(item.date).toLocaleDateString('ar-EG', { day:'2-digit', month:'long', year:'numeric' })}
+        </div>
+      </div>
+      <div class="stripe"></div>
 
+      <div class="info-grid">
+        <div class="info-box">
+          <div class="lbl">لصالح</div>
+          <div class="val">${item.name}</div>
+        </div>
+        <div class="info-box">
+          <div class="lbl">الإجمالي</div>
+          <div class="val">${Number(item.amount || 0).toLocaleString()} EGP</div>
+        </div>
+        <div class="info-box">
+          <div class="lbl">الحالة</div>
+          <div class="val">
+            <span class="badge ${item.approvalStatus === 'approved' ? 'badge-approved' : 'badge-pending'}">
+              ${item.approvalStatus === 'approved' ? 'تم التصديق' : 'لم يتم التصديق'}
+            </span>
+          </div>
+        </div>
+        <div class="info-box">
+          <div class="lbl">الدفع</div>
+          <div class="val">
+            <span class="badge ${item.purchased ? 'badge-purchased' : 'badge-pending'}">
+              ${item.purchased ? 'تم الدفع' : 'لم يتم الدفع'}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">تفاصيل الاصناف</div>
+      <table>
+        <thead>
+          <tr>
+            <th>الصنف</th>
+            <th>العدد</th>
+            <th>السعر</th>
+            <th>الإجمالي</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${(item.items || []).map(it => `
+            <tr>
+              <td>${it.description}</td>
+              <td>${it.count}</td>
+              <td>${Number(it.price).toLocaleString()} EGP</td>
+              <td>${(it.count * it.price).toLocaleString()} EGP</td>
+            </tr>
+          `).join('')}
+          <tr class="total-row">
+            <td colspan="3" style="text-align:right;letter-spacing:1px;font-size:11px;text-transform:uppercase">الإجمالي الكلي</td>
+            <td>${Number(item.amount || 0).toLocaleString()} EGP</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="footer">ProjectN · طُبع بتاريخ ${new Date().toLocaleString('ar-EG')}</div>
+    </div></body></html>
+  `)
+  win.document.close()
+  win.focus()
+  setTimeout(() => { win.print(); win.close() }, 500)
+}
   // ── Enter edit mode ──────────────────────────────────────────────
   const handleEditClick = (item) => {
     setEditingId(item._id)
@@ -54,7 +158,7 @@ const PaymentCard = ({ receipt, onDelete, onUpdate }) => {
     try {
       const token = sessionStorage.getItem('token')
       await axios.put(
-        `http://localhost:5000/api/receipt/${id}`,
+        `${BASE_URL}/api/receipt/${id}`,
         { name: editData.name, date: editData.date, items: editItems },
         { headers: { Authorization: `Bearer ${token}` } }
       )
@@ -72,7 +176,7 @@ const PaymentCard = ({ receipt, onDelete, onUpdate }) => {
     const token = sessionStorage.getItem('token')
     try {
       await axios.patch(
-        `http://localhost:5000/api/receipt/${item._id}/purchase`,
+       `${BASE_URL}/api/receipt/${item._id}/purchase`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       )
@@ -89,7 +193,7 @@ const PaymentCard = ({ receipt, onDelete, onUpdate }) => {
     const token = sessionStorage.getItem('token')
     try {
       await axios.patch(
-        `http://localhost:5000/api/receipt/${item._id}/approval`,
+        `${BASE_URL}/api/receipt/${item._id}/approval`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       )
@@ -134,6 +238,7 @@ const PaymentCard = ({ receipt, onDelete, onUpdate }) => {
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-bold text-base-content/50">#</span>
                   <span className="font-mono font-extrabold text-primary">{editData.receiptNumber}</span>
+                  <span className="font-mono font-extrabold text-primary">{item.name}</span>
                   <input
                     type="text"
                     className="input input-bordered input-sm w-40 font-bold text-primary"
@@ -143,10 +248,11 @@ const PaymentCard = ({ receipt, onDelete, onUpdate }) => {
                   />
                 </div>
               ) : (
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-56">
                   <span className="text-sm font-mono font-semibold text-base-content/60 bg-base-200 px-2 py-1 rounded-md">
                     #{item.receiptNumber}
                   </span>
+                  <span className="text-sm font-mono font-semibold text-base-content bg-base-200 px-2 py-1 rounded-md">لصالح: {item.name}</span>
                   {isPurchased && (
                     <span className="badge badge-sm badge-success font-semibold">Purchased</span>
                   )}
@@ -289,7 +395,9 @@ const PaymentCard = ({ receipt, onDelete, onUpdate }) => {
               </div>
 
               {/* Amount & Date */}
+
               <div className="flex flex-col md:items-end justify-center gap-2 min-w-[150px]">
+                
                 {isEditing ? (
                   <input
                     type="date"
@@ -314,6 +422,15 @@ const PaymentCard = ({ receipt, onDelete, onUpdate }) => {
             </div>
 
             {/* ── Actions Footer ── */}
+{role !== 'admin' && (
+  <button
+    onClick={() => handlePrint(item)}
+    className="btn btn-sm btn-ghost hover:bg-base-200 gap-1 ml-auto"
+  >
+    🖨 طباعة
+  </button>
+)}
+
             {role === 'admin' && (
               <div className="flex justify-end gap-2 pt-2 border-t border-base-200 mt-2">
                 {isEditing ? (
@@ -327,6 +444,12 @@ const PaymentCard = ({ receipt, onDelete, onUpdate }) => {
                   </>
                 ) : (
                   <>
+                      <button
+                        onClick={() => handlePrint(item)}
+                        className="btn btn-sm btn-ghost hover:bg-base-200 gap-1"
+                      >
+                        🖨 طباعة
+                      </button>
                     {isApproved && (
                       <button
                         onClick={() => handleToggle(item)}

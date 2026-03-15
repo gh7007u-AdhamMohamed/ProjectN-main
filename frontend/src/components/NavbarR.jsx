@@ -4,6 +4,8 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom'
 import { UserPlusIcon, InfoIcon } from 'lucide-react'
+import BASE_URL from '../config' 
+
 const NavbarR = ({ onAddClick, searchQuery, onSearch, walletRefresh }) => {
   const [addLoading, setAddLoading] = useState(false);
   const [addAmount, setAddAmount] = useState('');
@@ -22,7 +24,7 @@ const NavbarR = ({ onAddClick, searchQuery, onSearch, walletRefresh }) => {
       setRole(currentRole);
       
       const token = sessionStorage.getItem('token');
-      const { data } = await axios.get('http://localhost:5000/api/receipt/wallet', {
+      const { data } = await axios.get(`${BASE_URL}/api/receipt/wallet`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setWalletBalance(data.totalBalance ?? 0);
@@ -46,7 +48,7 @@ const NavbarR = ({ onAddClick, searchQuery, onSearch, walletRefresh }) => {
     try {
       const token = sessionStorage.getItem('token');
       await axios.post(
-        'http://localhost:5000/api/receipt/wallet',
+        `${BASE_URL}/api/receipt/wallet`,
         { amount },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -67,7 +69,7 @@ const NavbarR = ({ onAddClick, searchQuery, onSearch, walletRefresh }) => {
     try {
       const token = sessionStorage.getItem('token');
       await axios.post(
-        'http://localhost:5000/api/receipt/wallet/reset',
+        `${BASE_URL}/api/receipt/wallet/reset`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -133,7 +135,7 @@ const NavbarR = ({ onAddClick, searchQuery, onSearch, walletRefresh }) => {
                   <input
                     type="number"
                     min="0"
-                    step="0.01"
+                    step=""
                     placeholder="0.00"
                     value={addAmount}
                     onChange={(e) => setAddAmount(e.target.value)}

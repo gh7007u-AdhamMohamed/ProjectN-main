@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react'
 import NavbarR from '../components/NavbarR'
 import axios from 'axios'
+import BASE_URL from '../config' 
 
 /* ─── tiny print helper ────────────────────────────────────────────────── */
 const printSection = (id) => {
@@ -74,7 +75,7 @@ const ReceiptReport = () => {
     if (!range.start || !range.end) return
     setLoading(true)
     try {
-      const res = await axios.get('http://localhost:5000/api/receipt/report', {
+      const res = await axios.get(`${BASE_URL}/api/receipt/report`, {
         params: { receipeNumber: range.start, endNumber: range.end }
       })
       setSum(res.data.totalAmount)
@@ -238,8 +239,8 @@ const WalletReport = () => {
       const headers = { Authorization: `Bearer ${token}` }
 
       const [walletRes, historyRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/receipt/wallet', { headers }),
-        axios.get('http://localhost:5000/api/receipt/history', { headers }),
+        axios.get(`${BASE_URL}/api/receipt/wallet`, { headers }),
+        axios.get(`${BASE_URL}/api/receipt/history`, { headers }),
       ])
       setData({ wallet: walletRes.data, history: historyRes.data })
     } catch (e) {

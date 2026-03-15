@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import axios from 'axios'
+import BASE_URL from '../config' 
 
 const RegisterPage = () => {
   const navigate = useNavigate()
@@ -20,7 +21,7 @@ const RegisterPage = () => {
     }
     setLoading(true)
     try {
-      await axios.post('http://localhost:5000/api/users/register', {
+      await axios.post(`${BASE_URL}/api/users/register`, {
         email: formData.email,
         password: formData.password,
         role: formData.role,

@@ -28,7 +28,7 @@ changeStream.on("change", (change) => {
 const app = express();
 //middleware to parse json body
 app.use(express.json()); 
-app.use(cors({origin:"http://localhost:5173"}));
+app.use(cors({origin:["http://localhost:5173",'http://10.10.10.46:5173']}));
 const httpServer = createServer(app) 
 const io = new Server(httpServer, {
   cors: { origin: "*" } 
@@ -43,6 +43,6 @@ app.use('/api/receipt',receiptRoutes);
 
 
 //server listening on port 5000
-httpServer.listen(5000, () => {
-  console.log("Listening on port: 5000");
-});
+httpServer.listen(5000, '0.0.0.0', () => {
+  console.log('Listening on port: 5000')
+})
