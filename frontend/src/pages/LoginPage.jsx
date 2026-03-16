@@ -9,6 +9,7 @@ export const LoginPage = () => {
     email: '',   // starts empty
     password: '',   // starts empty
   })
+  
    const handleSubmit = async (e) => {
     e.preventDefault();
 

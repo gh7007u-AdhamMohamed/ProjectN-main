@@ -10,7 +10,9 @@ import { createServer } from 'http'
 import { Server } from 'socket.io'
 import dotenv from "dotenv";
 dotenv.config();
-const url = 'mongodb+srv://gh7007u_db_user:FileManger54@learnmongodb.xxuuapt.mongodb.net/FileManger';
+//const url = 'mongodb+srv://gh7007u_db_user:FileManger54@learnmongodb.xxuuapt.mongodb.net/FileManger';
+
+const url = process.env.url
 
  await mongoose.connect(url).then(()=>{
     console.log("Connected to MongoDB");

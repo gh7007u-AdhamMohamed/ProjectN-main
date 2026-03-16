@@ -41,7 +41,12 @@ const RegisterPage = () => {
         <h2 className='text-3xl font-extrabold text-primary font-mono tracking-tight text-center'>
           Register
         </h2>
-
+       <button
+            onClick={() => navigate('/ChangePassword')}
+            className="btn btn-outline btn-secondary w-full"
+          >
+            OR Change User Password
+          </button>
         <form className='space-y-6' onSubmit={handleSubmit}>
           <div>
             <label className='text-2xl font-extrabold text-primary font-mono tracking-tight'>Email</label>
@@ -88,7 +93,7 @@ const RegisterPage = () => {
             >
               <option value='admin'>Admin</option>
               <option value='superUser'>Super User</option>
-              <option value='viewer'>Viewer</option>
+              <option value='user'>user</option>
             </select>
           </div>
 

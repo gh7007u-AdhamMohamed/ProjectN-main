@@ -34,6 +34,7 @@ const NavbarR = ({ onAddClick, searchQuery, onSearch, walletRefresh }) => {
       setWalletLoading(false);
     }
   };
+  const navigate = useNavigate()
 
   // Triggers on mount AND whenever walletRefresh changes
   useEffect(() => {
@@ -88,9 +89,9 @@ const NavbarR = ({ onAddClick, searchQuery, onSearch, walletRefresh }) => {
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           
           {/* Logo / Title */}
-          <h1 className="text-2xl md:text-3xl font-extrabold text-primary font-mono tracking-tight flex items-center gap-2">
+          <button onClick={() => navigate('/receipts')} className="text-2xl md:text-3xl font-extrabold text-primary font-mono tracking-tight flex items-center gap-2">
             Payment Orders
-          </h1>
+          </button>
 
           {/* Search Bar */}
           <div className="w-full md:max-w-md flex items-center gap-2 bg-base-100 border border-base-300 rounded-full px-4 py-2 focus-within:ring-2 focus-within:ring-primary/50 transition-all">

@@ -73,7 +73,7 @@ const ReceiptsPage = () => {
 
   // ── Socket ───────────────────────────────────────────────────────
   useEffect(() => {
-    const socket = io('http://10.10.10.46:5000')
+    const socket = io(BASE_URL)
     socket.on('newReceipt', (r) => {
       setReceipt(prev => [r, ...prev])
       document.title = '🔔 تم اصدار امر صرف!'
@@ -189,14 +189,17 @@ const handleNameChange = (e) => {
 
               {/* Item input row */}
               <div className="flex gap-2" dir="rtl">
-                <input
-                  type="number"
-                  
-                  placeholder="العدد"
-                  className="input input-bordered w-1/4"
-                  value={newRow.count}
-                  onChange={(e) => setNewRow({ ...newRow, count: e.target.value })}
-                />
+              <input
+                type="number"
+                placeholder="العدد"
+                className="input input-bordered w-1/4"
+                value={newRow.count}
+                min="0"
+                onKeyDown={(e) => {
+                  if (e.key === '-' || e.key === 'e') e.preventDefault()
+                }}
+                onChange={(e) => setNewRow({ ...newRow, count: e.target.value })}
+              />
                 <input
                   type="text"
                   placeholder="الصنف"
@@ -204,13 +207,17 @@ const handleNameChange = (e) => {
                   value={newRow.description}
                   onChange={(e) => setNewRow({ ...newRow, description: e.target.value })}
                 />
-                <input
-                  type="number"
-                  placeholder="السعر"
-                  className="input input-bordered w-1/4"
-                  value={newRow.price}
-                  onChange={(e) => setNewRow({ ...newRow, price: e.target.value })}
-                />
+                  <input
+                    type="number"
+                    placeholder="السعر"
+                    className="input input-bordered w-1/4"
+                    value={newRow.price}
+                    min="0"
+                    onKeyDown={(e) => {
+                      if (e.key === '-' || e.key === 'e') e.preventDefault()
+                    }}
+                    onChange={(e) => setNewRow({ ...newRow, price: e.target.value })}
+                  />
                 <button className="btn btn-primary btn-square" onClick={handleAddRow}>
                   <PlusIcon className="size-4" />
                 </button>

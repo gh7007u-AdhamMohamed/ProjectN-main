@@ -9,6 +9,7 @@ import { Toaster } from 'react-hot-toast';
 import Report from './pages/Report'
 import Registerpage from './pages/Registerpage'
 import Aboutpage from './pages/Aboutpage'
+import ChangePassword from'./pages/ChangePassword'
 
 const App = () => {
   return (
@@ -35,6 +36,8 @@ const App = () => {
         <Route path='/home' element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
         <Route path='/create-file' element={<ProtectedRoute><CreateFile /></ProtectedRoute>} />
         <Route path='/register' element={<ProtectedRoute><Registerpage /></ProtectedRoute>} />
+        <Route path='/ChangePassword' element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
+
          <Route path='/about' element={<Aboutpage />} />
       </Routes>
     </div>

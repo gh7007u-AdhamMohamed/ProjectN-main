@@ -64,10 +64,41 @@ const login= async(req,res,next)=>{
         res.status(500).json({status:"error",message:error.message});
 }}
 
+const changePassword = async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found"
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(200).json({
+      status: "success",
+      message: "Password updated successfully"
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      status: "error",
+      message: err.message
+    });
+  }
+};
 export default {
     getAllUsers,
     register,
-    login
+    login,
+    changePassword
 
 
 };

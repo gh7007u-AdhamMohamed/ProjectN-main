@@ -17,6 +17,7 @@ export default {
       "aqua", "lofi", "pastel", "fantasy", "wireframe", "black", "luxury",
       {
         dracula: {
+          
           "primary": "#89b4fa",
           "secondary": "#94e2d5",
           "accent": "#89dceb",
@@ -31,6 +32,6 @@ export default {
           "error": "#f38ba8",
         },
       },
-    ],
+    ],darkMode: false,
   },
 }
