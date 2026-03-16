@@ -7,6 +7,7 @@ import { UserPlusIcon, InfoIcon } from 'lucide-react'
 import BASE_URL from '../config' 
 
 const NavbarR = ({ onAddClick, searchQuery, onSearch, walletRefresh }) => {
+  
   const [addLoading, setAddLoading] = useState(false);
   const [addAmount, setAddAmount] = useState('');
   const [walletBalance, setWalletBalance] = useState(null);
@@ -15,6 +16,10 @@ const NavbarR = ({ onAddClick, searchQuery, onSearch, walletRefresh }) => {
   const [role, setRole] = useState(null);
   const [resetLoading, setResetLoading] = useState(false);
 
+  const handleNavbarClick = () => {
+  console.log("The whole navbar was clicked!");
+  navigate("/receipts"); // For example, return home
+};
   // Fetch wallet and role
   const handleWallet = async () => {
     setWalletLoading(true);
@@ -84,6 +89,8 @@ const NavbarR = ({ onAddClick, searchQuery, onSearch, walletRefresh }) => {
   };
 
   return (
+    <nav onClick={handleNavbarClick} className="">
+
     <header className="bg-base-200 border-b border-base-300 sticky top-0 z-50 shadow-sm">
       <div className="mx-auto max-w-7xl p-4">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
@@ -178,6 +185,7 @@ const NavbarR = ({ onAddClick, searchQuery, onSearch, walletRefresh }) => {
         </div>
       </div>
     </header>
+    </nav>
   );
 };
 

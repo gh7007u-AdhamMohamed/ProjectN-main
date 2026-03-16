@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import axios from 'axios'
 import BASE_URL from '../config' 
+import NavbarR from '../components/NavbarR'
 
 const RegisterPage = () => {
   const navigate = useNavigate()
@@ -36,6 +37,8 @@ const RegisterPage = () => {
   }
 
   return (
+    <>
+    <NavbarR/>
     <div className='min-h-screen flex items-center justify-center'>
       <div className='w-full max-w-md p-8 space-y-6 bg-base-100 rounded-xl border border-base-300'>
         <h2 className='text-3xl font-extrabold text-primary font-mono tracking-tight text-center'>
@@ -107,7 +110,8 @@ const RegisterPage = () => {
         </form>
       </div>
     </div>
-  )
+ </> )
+  
 }
 
 export default RegisterPage

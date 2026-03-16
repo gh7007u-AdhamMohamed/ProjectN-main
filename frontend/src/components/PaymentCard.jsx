@@ -5,6 +5,8 @@ import {
 } from 'lucide-react'
 import axios from 'axios'
 import BASE_URL from '../config' 
+import toast, { Toaster } from 'react-hot-toast'
+
 const PaymentCard = ({ receipt, onDelete, onUpdate }) => {
   const role = sessionStorage.getItem('role')
   const [editingId, setEditingId] = useState(null)
@@ -97,7 +99,6 @@ win.document.write(`
       <div style="margin-top:10px;text-align:left;font-size:11px;font-weight:700">قائد الوحدة عميد / أحمد ابرهيم أبو الخير</div>
     </div>
 
-    <div class="footer">PaymentOrderManager · طُبع بتاريخ ${new Date().toLocaleString('ar-EG')}</div>
 
   </body></html>
 `)
@@ -105,7 +106,6 @@ win.document.write(`
   win.focus()
   setTimeout(() => { win.print(); win.close() }, 500)
 }
-  // ── Enter edit mode ──────────────────────────────────────────────
   const handleEditClick = (item) => {
     setEditingId(item._id)
     setEditData({
@@ -113,7 +113,6 @@ win.document.write(`
       name: item.name,
       date: new Date(item.date).toISOString().split('T')[0],
     })
-    // clone items so we can mutate locally
     setEditItems((item.items || []).map(i => ({ ...i })))
     setNewItem({ count: '', description: '', price: '' })
   }
@@ -124,12 +123,10 @@ win.document.write(`
     setEditItems([])
   }
 
-  // ── Delete an item row in edit mode ─────────────────────────────
   const handleRemoveEditItem = (index) => {
     setEditItems(prev => prev.filter((_, i) => i !== index))
   }
 
-  // ── Add a new item row in edit mode ─────────────────────────────
   const handleAddEditItem = () => {
     if (!newItem.count || !newItem.description || !newItem.price) return
     setEditItems(prev => [
@@ -141,7 +138,6 @@ win.document.write(`
 
   const editTotal = editItems.reduce((s, i) => s + Number(i.count) * Number(i.price), 0)
 
-  // ── Save ─────────────────────────────────────────────────────────
   const handleSave = async (id) => {
     try {
       const token = sessionStorage.getItem('token')
@@ -163,6 +159,22 @@ win.document.write(`
     setLoadingId(item._id)
     const token = sessionStorage.getItem('token')
     try {
+      if(!item.purchased)
+        {
+      const walletRes = await axios.get(`${BASE_URL}/api/receipt/wallet`, {
+      headers: { Authorization: `Bearer ${sessionStorage.getItem('token')}` }
+    })
+        const balance = walletRes.data?.totalBalance || 0
+    if (balance - item.amount < 0) {
+      toast.error(`الرصيد غير كافي — الرصيد الحالي: ${balance.toLocaleString()} EGP`, {
+        id: 'insufficient-balance', 
+      });
+      return
+    }
+      }
+
+
+
       await axios.patch(
        `${BASE_URL}/api/receipt/${item._id}/purchase`,
         {},
@@ -176,7 +188,6 @@ win.document.write(`
     }
   }
 
-  // ── Approval toggle ──────────────────────────────────────────────
   const handleApprovalToggle = async (item) => {
     const token = sessionStorage.getItem('token')
     try {
@@ -275,7 +286,8 @@ win.document.write(`
                     <div className="grid grid-cols-[2fr_1fr_1.5fr_auto] gap-2 text-xs font-bold text-base-content/60 px-2">
                       <span>الصنف</span>
                       <span className="text-center">العدد</span>
-                      <span className="text-end">السعر</span>
+                      <span className="text-center">السعر</span>
+                      
                       <span />
                     </div>
 
@@ -285,6 +297,11 @@ win.document.write(`
                         <input
                           className="input input-bordered input-xs w-full"
                           value={ei.description}
+                          onKeyDown={(e) => {
+                              if (e.key === '-' || e.key === 'e') {
+                                e.preventDefault();
+                              }
+                            }}
                           onChange={(e) => {
                             const updated = [...editItems]
                             updated[index].description = e.target.value
@@ -295,7 +312,15 @@ win.document.write(`
                           type="number"
                           className="input input-bordered input-xs w-full text-center"
                           value={ei.count}
+                           min="1"
+
+                          onKeyDown={(e) => {
+                              if (e.key === '-' || e.key === 'e') {
+                                e.preventDefault();
+                              }
+                            }}
                           onChange={(e) => {
+                            
                             const updated = [...editItems]
                             updated[index].count = e.target.value
                             setEditItems(updated)
@@ -305,6 +330,12 @@ win.document.write(`
                           type="number"
                           className="input input-bordered input-xs w-full text-end"
                           value={ei.price}
+                           min="1"
+                          onKeyDown={(e) => {
+                        if (e.key === '-' || e.key === 'e') {
+                          e.preventDefault();
+                        }
+                      }}
                           onChange={(e) => {
                             const updated = [...editItems]
                             updated[index].price = e.target.value
@@ -334,14 +365,26 @@ win.document.write(`
                         type="number"
                         className="input input-bordered input-xs w-full text-center"
                         placeholder="العدد"
+                       min="1"
                         value={newItem.count}
+                        onKeyDown={(e) => {
+                        if (e.key === '-' || e.key === 'e') {
+                          e.preventDefault();
+                        }
+                      }}
                         onChange={(e) => setNewItem({ ...newItem, count: e.target.value })}
                       />
                       <input
                         type="number"
                         className="input input-bordered input-xs w-full text-end"
                         placeholder="السعر"
+                         min="1"
                         value={newItem.price}
+                        onKeyDown={(e) => {
+                        if (e.key === '-' || e.key === 'e') {
+                          e.preventDefault();
+                        }
+                      }}
                         onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
                       />
                       <button
@@ -359,23 +402,27 @@ win.document.write(`
                     </div>
                   </div>
                 ) : (
-                  /* ── Display mode ── */
-                  <div className="flex flex-col gap-1.5" dir="rtl">
-                    <div className="grid grid-cols-[2fr_1fr_1.5fr] gap-3 text-xs font-bold text-base-content/60 px-4 mb-1">
-                      <span className="text-start">الصنف</span>
-                      <span className="text-center">العدد</span>
-                      <span className="text-end">السعر</span>
-                    </div>
+                      <div className="flex flex-col gap-1.5" dir="rtl">
+                        <div className="grid grid-cols-[2fr_1fr_1fr_1.5fr] gap-3 text-xs font-bold text-base-content/60 px-4 mb-1">
+                          <span className="text-start">الصنف</span>
+                          <span className="pr-[10px]">العدد</span>
+                          <span className=" pr-[68px]">السعر</span>
+                         <span className="text-end">الإجمالي</span>
+
+                        </div>
                     {(item.items || []).map((line, index) => (
                       <div
                         key={line._id || index}
-                        className="grid grid-cols-[2fr_1fr_1.5fr] gap-3 text-sm bg-base-200/40 hover:bg-base-200 border border-base-200/60 px-4 py-2 rounded-lg transition-all items-center"
+                        className="grid grid-cols-[2fr_1fr_1.5fr_1fr] gap-3 text-sm bg-base-200/40 hover:bg-base-200 border border-base-200/60 px-4 py-2 rounded-lg transition-all items-center"
                       >
                         <span className="font-semibold text-base-content text-start truncate" title={line.description}>
                           {line.description}
                         </span>
-                        <span className="text-center text-base-content/70 font-medium">{line.count}</span>
-                        <span className="text-end font-bold text-primary">{Number(line.price).toLocaleString()} EGP</span>
+                        <span className="pr-[19px] text-base-content/70 font-medium">{line.count}</span>
+                        <span className="text-center text-base-content/70 font-medium">{Number(line.price).toLocaleString()} EGP</span>
+                        <span className="text-end text-base-content/70 font-bold text-primary">
+                          {(Number(line.count) * Number(line.price)).toLocaleString()} EGP
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -394,6 +441,7 @@ win.document.write(`
                     onChange={(e) => setEditData({ ...editData, date: e.target.value })}
                   />
                 ) : (
+
                   <>
                     <p className="text-2xl font-black text-primary font-mono tracking-tight">
                       {Number(item.amount || 0).toLocaleString()}{' '}

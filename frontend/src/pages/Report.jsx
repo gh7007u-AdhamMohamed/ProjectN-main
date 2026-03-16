@@ -3,7 +3,6 @@ import NavbarR from '../components/NavbarR'
 import axios from 'axios'
 import BASE_URL from '../config' 
 
-/* ─── tiny print helper ────────────────────────────────────────────────── */
 const printSection = (id) => {
   const el = document.getElementById(id)
   if (!el) return
