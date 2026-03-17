@@ -21,7 +21,7 @@ win.document.write(`
   <meta charset="utf-8"/>
   <title>امر صرف #${item.receiptNumber}</title>
   <style>
-    @page { size: A5; margin: 10mm; }
+    @page { size: A4; margin: 10mm; }
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:'Segoe UI',sans-serif;background:#fff;color:#0d1b2a;padding:16px;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-size:12px;}
     
@@ -35,7 +35,7 @@ win.document.write(`
 
     .header{background:#0d1b2a;color:#ffffff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center}
     .header .title{font-size:16px;font-weight:800;color:#ffffff} /* Bright white */
-    .header .meta{font-size:10px;opacity:.8;text-align:left;line-height:1.8;color:#ffffff}
+    .header .meta{font-size:10px;text-align:left;line-height:1.8;color:#ffffff}
     .stripe{height:3px;background:linear-gradient(90deg,#2e86ab,#00c6ae,#f4a261);}
     
     /* NEW: Content wrapper so padding applies inside the border */
@@ -59,11 +59,11 @@ win.document.write(`
     .total-row{background:#0d1b2a!important}
     .total-row td{color:#ffffff!important;font-weight:700;font-size:12px;padding:8px 10px} /* Bright white */
     
-    /* Cleaned up signature box for RTL */
-    .signature-box{margin-top:24px; display:flex; flex-direction:column; align-items:flex-end;}
-    .sig-line{font-size:11px; margin-bottom: 8px;}
-    .sig-title{font-size:11px;font-weight:700; text-align: center; width: 140px;}
-    
+    /* Cleaned up signature box layout */
+    .fl{display:flex;justify-content:space-between;align-items:flex-start; margin-top: 30px;}
+    .signature-box{display:flex; flex-direction:column; align-items:center; width: 150px;}
+    .sig-title{padding-bottom:10px;font-size:12px;font-weight:700; text-align: center;}
+    .sig-line{font-size:11px;font-weight:700; text-align: center;}
   </style>
   </head><body>
 
@@ -71,7 +71,7 @@ win.document.write(`
       <div class="header">
         <div class="title">🧾 امر صرف</div>
         <div class="meta">
-          رقم الامر: #${item.receiptNumber}<br/>
+          رقم أمر الصرف: #${item.receiptNumber}<br/>
           ${new Date(item.date).toLocaleDateString('ar-EG', { day:'2-digit', month:'long', year:'numeric' })}
         </div>
       </div>
@@ -115,11 +115,17 @@ win.document.write(`
           </tbody>
         </table>
 
-        <div class="signature-box">
-          <div class="sig-line">التوقيع : (　　　　　　　　)</div>
-          <div class="sig-title">قائد الوحدة</div>
+        <div class="fl">
+          <div class="signature-box">
+            <div class="sig-title">يصرف لـ</div>
+            <div class="sig-line">التوقيع : (　　　　　　　　)</div>
+          </div>
+          <div class="signature-box">
+            <div class="sig-title">قائد الوحدة</div>
+            <div class="sig-line">التوقيع : (　　　　　　　　)</div>
+          </div>
         </div>
-      </div>
+        </div>
     </div>
 
   </body></html>
