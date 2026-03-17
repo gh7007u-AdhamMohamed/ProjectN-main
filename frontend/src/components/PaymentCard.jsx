@@ -17,91 +17,113 @@ const PaymentCard = ({ receipt, onDelete, onUpdate }) => {
 const handlePrint = (item) => {
   const win = window.open('', '_blank', 'width=800,height=600')
 win.document.write(`
-  <!DOCTYPE html><html><head>
+  <!DOCTYPE html><html dir="rtl"><head>
   <meta charset="utf-8"/>
   <title>امر صرف #${item.receiptNumber}</title>
   <style>
     @page { size: A5; margin: 10mm; }
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Segoe UI',sans-serif;background:#fff;color:#0d1b2a;padding:16px;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-size:12px}
-    .header{background:#0d1b2a;color:#fff;padding:14px 20px;border-radius:10px 10px 0 0;display:flex;justify-content:space-between;align-items:center}
-    .header .title{font-size:16px;font-weight:800}
-    .header .meta{font-size:10px;opacity:.6;text-align:right;line-height:1.8}
-    .stripe{height:3px;background:linear-gradient(90deg,#2e86ab,#00c6ae,#f4a261);margin-bottom:16px}
+    body{font-family:'Segoe UI',sans-serif;background:#fff;color:#0d1b2a;padding:16px;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-size:12px;}
+    
+    /* NEW: A nice bordered container to surround the whole receipt */
+    .receipt-card {
+      border: 2px solid #0d1b2a;
+      border-radius: 12px;
+      overflow: hidden; /* Clips the inner elements to the rounded corners naturally */
+      background: #fff;
+    }
+
+    .header{background:#0d1b2a;color:#ffffff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center}
+    .header .title{font-size:16px;font-weight:800;color:#ffffff} /* Bright white */
+    .header .meta{font-size:10px;opacity:.8;text-align:left;line-height:1.8;color:#ffffff}
+    .stripe{height:3px;background:linear-gradient(90deg,#2e86ab,#00c6ae,#f4a261);}
+    
+    /* NEW: Content wrapper so padding applies inside the border */
+    .receipt-body { padding: 20px; }
+
     .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
     .info-box{border:1px solid #e8eef4;border-radius:6px;padding:8px 12px}
     .info-box .lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#6b7e94;margin-bottom:2px}
     .info-box .val{font-size:13px;font-weight:600;color:#0d1b2a}
     .section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#6b7e94;margin-bottom:6px;padding-bottom:5px;border-bottom:1.5px solid #e8eef4}
-    table{width:100%;border-collapse:collapse;font-size:11px;direction:rtl}
+    
+    table{width:100%;border-collapse:collapse;font-size:11px}
     thead tr{background:#0d1b2a}
-    thead th{padding:7px 10px;font-weight:600;font-size:10px;color:#fff;text-align:right}
+    thead th{padding:7px 10px;font-weight:600;font-size:10px;color:#ffffff;text-align:right} /* Bright white */
     thead th:last-child{text-align:left}
     tbody tr:nth-child(even){background:#f8fafc}
     tbody tr{border-bottom:1px solid #e8eef4}
     tbody td{padding:7px 10px;text-align:right}
     tbody td:last-child{text-align:left;font-weight:700;color:#1e3a5f}
+    
     .total-row{background:#0d1b2a!important}
-    .total-row td{color:#fff!important;font-weight:700;font-size:12px;padding:8px 10px}
-    .signature-box{margin-top:24px}
-    .footer{text-align:center;font-size:9px;color:#a0adb8;margin-top:16px;padding-top:10px;border-top:1px solid #e8eef4}
+    .total-row td{color:#ffffff!important;font-weight:700;font-size:12px;padding:8px 10px} /* Bright white */
+    
+    /* Cleaned up signature box for RTL */
+    .signature-box{margin-top:24px; display:flex; flex-direction:column; align-items:flex-end;}
+    .sig-line{font-size:11px; margin-bottom: 8px;}
+    .sig-title{font-size:11px;font-weight:700; text-align: center; width: 140px;}
+    
   </style>
   </head><body>
 
-    <div class="header">
-      <div class="title">🧾 امر صرف</div>
-      <div class="meta">
-        رقم الامر: #${item.receiptNumber}<br/>
-        ${new Date(item.date).toLocaleDateString('ar-EG', { day:'2-digit', month:'long', year:'numeric' })}
+    <div class="receipt-card">
+      <div class="header">
+        <div class="title">🧾 امر صرف</div>
+        <div class="meta">
+          رقم الامر: #${item.receiptNumber}<br/>
+          ${new Date(item.date).toLocaleDateString('ar-EG', { day:'2-digit', month:'long', year:'numeric' })}
+        </div>
+      </div>
+      <div class="stripe"></div>
+
+      <div class="receipt-body">
+        <div class="info-grid">
+          <div class="info-box">
+            <div class="lbl">لصالح</div>
+            <div class="val">${item.name}</div>
+          </div>
+          <div class="info-box">
+            <div class="lbl">الإجمالي</div>
+            <div class="val">${Number(item.amount || 0).toLocaleString()} EGP</div>
+          </div>
+        </div>
+
+        <div class="section-title">تفاصيل الاصناف</div>
+        <table>
+          <thead>
+            <tr>
+              <th>الصنف</th>
+              <th>العدد</th>
+              <th>السعر</th>
+              <th>الإجمالي</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${(item.items || []).map(it => `
+              <tr>
+                <td>${it.description}</td>
+                <td>${it.count}</td>
+                <td>${Number(it.price).toLocaleString()} EGP</td>
+                <td>${(it.count * it.price).toLocaleString()} EGP</td>
+              </tr>
+            `).join('')}
+            <tr class="total-row">
+              <td colspan="3" style="text-align:right;font-size:10px">الإجمالي الكلي</td>
+              <td>${Number(item.amount || 0).toLocaleString()} EGP</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="signature-box">
+          <div class="sig-line">التوقيع : (　　　　　　　　)</div>
+          <div class="sig-title">قائد الوحدة</div>
+        </div>
       </div>
     </div>
-    <div class="stripe"></div>
-
-    <div class="info-grid">
-      <div class="info-box">
-        <div class="lbl">لصالح</div>
-        <div class="val">${item.name}</div>
-      </div>
-      <div class="info-box">
-        <div class="lbl">الإجمالي</div>
-        <div class="val">${Number(item.amount || 0).toLocaleString()} EGP</div>
-      </div>
-    </div>
-
-    <div class="section-title">تفاصيل الاصناف</div>
-    <table>
-      <thead>
-        <tr>
-          <th>الصنف</th>
-          <th>العدد</th>
-          <th>السعر</th>
-          <th>الإجمالي</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${(item.items || []).map(it => `
-          <tr>
-            <td>${it.description}</td>
-            <td>${it.count}</td>
-            <td>${Number(it.price).toLocaleString()} EGP</td>
-            <td>${(it.count * it.price).toLocaleString()} EGP</td>
-          </tr>
-        `).join('')}
-        <tr class="total-row">
-          <td colspan="3" style="text-align:right;font-size:10px">الإجمالي الكلي</td>
-          <td>${Number(item.amount || 0).toLocaleString()} EGP</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <div class="signature-box">
-      <div style="margin-top:24px;text-align:left;font-size:11px">(　　　　　　　　) :التوقيع</div>
-      <div style="margin-top:10px;text-align:left;font-size:11px;font-weight:700">قائد الوحدة عميد / أحمد ابرهيم أبو الخير</div>
-    </div>
-
 
   </body></html>
-`)
+`);
   win.document.close()
   win.focus()
   setTimeout(() => { win.print(); win.close() }, 500)
