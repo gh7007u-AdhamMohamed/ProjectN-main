@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon index.js",
-    "start": "node index.js",
-    "scripter": "node ./Scripts/fileScanner.js"
-  },
+  "dev": "nodemon index.js",
+  "start": "node index.js",
+  "scripter": "node ./Scripts/fileScanner.js"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
