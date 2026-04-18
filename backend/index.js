@@ -31,8 +31,13 @@ const app = express();
 //middleware to parse json body
 app.use(express.json()); 
 app.use(cors({
-  origin: "*"
-}));const httpServer = createServer(app) 
+  origin: "https://project-n-main-qjzc.vercel.app",
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
+app.options("*", cors());
+const httpServer = createServer(app) 
 const io = new Server(httpServer, {
   cors: { origin: "*" } 
 })
