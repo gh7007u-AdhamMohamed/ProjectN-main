@@ -30,8 +30,9 @@ changeStream.on("change", (change) => {
 const app = express();
 //middleware to parse json body
 app.use(express.json()); 
-app.use(cors({origin:["http://localhost:5173",'http://10.10.10.46:5173']}));
-const httpServer = createServer(app) 
+app.use(cors({
+  origin: "*"
+}));const httpServer = createServer(app) 
 const io = new Server(httpServer, {
   cors: { origin: "*" } 
 })
